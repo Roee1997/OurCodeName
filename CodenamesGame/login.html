@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Codenames</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Codenames</h1>
+    </header>
+
+    <main class="login-page">
+        <section class="login-container">
+            <h2>Login or Sign Up</h2>
+
+            <!-- טופס התחברות -->
+            <form class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="login-button">Login</button>
+                    <button type="button" id="signup-button">Sign Up</button>
+                </div>
+            </form>
+
+            <!-- או -->
+            <br />
+            <p class="separator">Login to create a room</p>
+
+            <!-- צור חדר -->
+            <button class="create-room-button" disabled>Create Game Room</button>
+            <p class="note">* Only logged-in users can create or join rooms.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Codenames Game</p>
+    </footer>
+</body>
+</html>

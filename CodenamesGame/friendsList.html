@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends List - Codenames</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Friends List</h1>
+    </header>
+
+    <main class="friends-page">
+        <section class="add-friend">
+            <h2>Add a Friend</h2>
+            <form>
+                <input type="text" id="friend-email" placeholder="Enter friend's email">
+                <button type="button" id="add-friend-button">Add Friend</button>
+            </form>
+        </section>
+
+        <section class="friend-list">
+            <h2>Your Friends</h2>
+            <ul id="friend-list">
+                <!-- רשימה דינמית של חברים -->
+                <li>
+                    <span>John Doe</span>
+                    <button class="invite-button">Invite</button>
+                </li>
+                <li>
+                    <span>Jane Smith</span>
+                    <button class="invite-button">Invite</button>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Codenames Game</p>
+    </footer>
+</body>
+</html>

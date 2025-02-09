@@ -1,0 +1,487 @@
+﻿/* basics */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+header {
+    background-color: #005f99;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    width:100%;
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #ddd;
+    margin-top: 20px;
+}
+
+/* teams */
+.teams {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin-bottom: 20px;
+}
+
+.team {
+    width: 30%;
+    text-align: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.team-red {
+    border-left: 5px solid #e63946;
+}
+
+.team-blue {
+    border-left: 5px solid #457b9d;
+}
+
+.team p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.team strong {
+    color: #005f99;
+}
+
+.team-red strong {
+    color: #e63946;
+}
+
+.team-blue strong {
+    color: #457b9d;
+}
+
+/* Game board */
+.board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    background-color: #e0e0e0;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-transform: capitalize;
+}
+
+    .card:hover {
+        background-color: #d1d1d1;
+    }
+
+/* General design */
+.layout {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    gap: 20px;
+}
+
+/* Game log */
+.game-log {
+    width: 25%;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.game-log h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.log {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.log p {
+    font-size: 14px;
+    line-height: 1.5;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.log p:last-child {
+    border-bottom: none;
+}
+
+/* navbar */
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.navbar button {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: white;
+    background-color: #005f99;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.navbar button:hover {
+    background-color: #004080;
+}
+
+.navbar button:active {
+    background-color: #003060;
+}
+
+#players-button {
+    background-color: #457b9d;
+}
+
+#players-button:hover {
+    background-color: #356a85;
+}
+
+
+/* spyMaster cards colors */
+.card.red {
+    background-color: #e63946; /* אדום */
+    color: white;
+}
+
+.card.blue {
+    background-color: #457b9d; /* כחול */
+    color: white;
+}
+
+.card.neutral {
+    background-color: #e0e0e0; /* ניטרלי */
+    color: #333;
+}
+
+.card.black {
+    background-color: #333; /* שחור */
+    color: white;
+}
+
+/* spyMaster send hint */
+.hint-section {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.hint-section form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.hint-section input,
+.hint-section select,
+.hint-section button {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.hint-section button {
+    background-color: #005f99;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+.hint-section button:hover {
+    background-color: #004080;
+}
+
+
+/* login */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    background-color: #f4f4f9;
+}
+
+.login-container {
+    width: 400px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.form-actions button {
+    width: 48%;
+    padding: 10px 15px;
+    background-color: #005f99;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-actions button:hover {
+    background-color: #004080;
+}
+
+.create-room-button {
+    width: 100%;
+    padding: 10px 15px;
+    margin-top: 20px;
+    background-color: #457b9d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.create-room-button:enabled {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.create-room-button:enabled:hover {
+    background-color: #356a85;
+}
+
+.separator {
+    margin: 15px 0;
+    font-size: 14px;
+    color: #777;
+}
+
+.note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #777;
+}
+
+
+/* SignUp */
+.signup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    background-color: #f4f4f9;
+}
+
+.signup-container {
+    width: 400px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.signup-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    width: 48%;
+    padding: 10px 15px;
+    background-color: #005f99;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-actions button:hover {
+    background-color: #004080;
+}
+
+#cancel-button {
+    background-color: #e63946;
+}
+
+#cancel-button:hover {
+    background-color: #c12636;
+}
+
+
+/* Join to team buttons */
+.join-button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: white;
+    background-color: #005f99;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.join-button:hover {
+    background-color: #004080;
+}
+
+.join-button:active {
+    background-color: #003060;
+}
+
+/* Friends list */
+.friends-page {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.add-friend form {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.add-friend input {
+    flex: 1;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.add-friend button {
+    padding: 10px 15px;
+    background-color: #005f99;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.friend-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.friend-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.invite-button {
+    padding: 5px 10px;
+    background-color: #457b9d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

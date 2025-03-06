@@ -1,6 +1,6 @@
 import React from 'react';
 import Login from '../components/Login';
-import '/auth.css'
+import '../css/auth.css';
 const LoginPage = () => {
   return (
     <div>

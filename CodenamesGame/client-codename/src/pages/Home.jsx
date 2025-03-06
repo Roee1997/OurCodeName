@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import '/HomaPage.css'
+import '../css/HomaPage.css';
+
 
 const Home = () => {
   return (

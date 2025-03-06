@@ -1,0 +1,32 @@
+/* עיצוב טופס התחברות */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .auth-form input {
+    padding: 12px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  
+  .auth-form button {
+    padding: 12px;
+    width: 100%;
+    max-width: 400px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .auth-form button:hover {
+    background-color: #218838;
+  }
+  

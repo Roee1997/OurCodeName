@@ -1,0 +1,62 @@
+/* מרכז את כל התוכן בעמוד הבית */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh; /* תופס את כל הגובה */
+    background-color: #f4f4f4;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .home-header {
+    text-align: center;
+    margin-bottom: 30px; /* רווח מתחת לכותרת */
+  }
+  
+  .home-header h1 {
+    font-size: 3rem; /* גודל כותרת גדול */
+    color: #3e8e41; /* צבע ירוק כהה */
+  }
+  
+  .home-header p {
+    font-size: 1.2rem; /* גודל טקסט ברמת פסקה */
+    color: #666; /* צבע אפור כהה */
+  }
+  
+  /* עיצוב הכפתורים */
+  .home-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* רווח בין הכפתורים */
+    width: 100%;
+    max-width: 400px; /* רוחב מקסימלי */
+  }
+  
+  .home-button {
+    padding: 15px 30px;
+    background-color: #007bff; /* צבע כחול לכפתור */
+    color: white;
+    font-size: 1.3rem; /* גודל טקסט */
+    text-decoration: none;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+    transition: background-color 0.3s; /* שינוי צבע בזמן מעבר */
+  }
+  
+  .home-button:hover {
+    background-color: #0056b3; /* צבע חדש כאשר הכפתור נלחץ */
+  }
+  
+  /* פוטר */
+  .home-footer {
+    margin-top: 50px;
+    font-size: 0.9rem;
+    color: #888;
+    text-align: center;
+  }

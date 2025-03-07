@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import '../css/HomaPage.css';
 
-
 const Home = () => {
   return (
     <div className="home-container">
@@ -14,7 +13,7 @@ const Home = () => {
       <div className="home-actions">
         <Link to="/login" className="home-button">התחברות</Link>
         <Link to="/register" className="home-button">הרשמה</Link>
-        <Link to="/game" className="home-button">התחל משחק</Link>
+       
       </div>
 
       <footer className="home-footer">

@@ -1,4 +1,4 @@
-import { auth } from "../../firebaseConfig";
+import { auth } from "../../firebaseConfig"; // ייבוא auth מ-firebaseConfig
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 // הרשמה
@@ -7,7 +7,8 @@ export const registerUser = async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error("Error registering:", error);
+    console.error("Firebase auth error:", error); // הצגת השגיאה האמיתית
+    throw error; // להעביר את השגיאה הלאה כדי שהלקוח יקבל אותה
   }
 };
 
@@ -17,7 +18,8 @@ export const loginUser = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error("Error logging in:", error);
+    console.error("Firebase auth error:", error); // הצגת השגיאה האמיתית
+    throw error; // להעביר את השגיאה הלאה כדי שהלקוח יקבל אותה
   }
 };
 

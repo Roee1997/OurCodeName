@@ -1,29 +1,30 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext'; // חשוב לוודא שה-AuthProvider מיובא כראוי
 import Home from "./pages/Home";
 import Game from "./pages/Game";
-import RegisterPage from './pages/RegisterPage';
-import LoginPage from './pages/LoginPage';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import LobbyPage from "./pages/Lobby";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute"; // הקומפוננטה ששומרת על עמודים מוגנים
 import './css/App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    
+    <AuthProvider> {/* עטוף את כל האפליקציה ב-AuthProvider */}
       <div className="container">
-        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-          <Route path="/game" element={<Game />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/lobby" element={<LobbyPage />} />
+            <Route path="/game" element={<Game />} />
+          </Route>
+          <Route path="*" element={<Home />} />
         </Routes>
       </div>
-    
-  )
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

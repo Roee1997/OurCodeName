@@ -1,71 +1,91 @@
-
-/* בסיס: כל הדף יתפוס את כל הגובה והגודל */
+/* 1. מניעת גלילה אופקית */
 html, body {
-  height: 100%;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;  /* נמנע גלילה אופקית */
 }
 
-/* דאג שהתוכן יהיה ממורכז ומודגש */
+/* 2. Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box; /* מוודא שהpadding והborder לא גורמים לבעיות */
+}
+
+/* 3. הגדרת רווחים */
+body {
+  font-family: 'Arial', sans-serif;  /* או כל פונט אחר שתרצה */
+  line-height: 1.5;
+  background-color: #f0f0f0; /* אפשר לשנות את הצבע לפי הצורך */
+}
+
+/* 4. וודא שהדף מתפשט בצורה נכונה */
 #root {
-  display: flex;
-  justify-content: center;  /* ממורכז במאונך */
-  align-items: center;      /* ממורכז לרוחב */
-  min-height: 100vh;        /* תופס לפחות את כל הגובה של המסך */
+  height: 100%;
   width: 100%;
-}
-/* קונטיינר מרכזי */
-.container {
-  width: 100%;
-  max-width: 1200px;  /* מקסימום רוחב */
-  margin: 0 auto;     /* ממורכז על המסך */
-  padding: 30px;      /* ריווח פנימי */
-  text-align: center; /* טקסט ממורכז */
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* צל */
 }
 
-/* כותרת ראשית */
-h1 {
-  font-size: 3rem;
-  color: #333;
-  margin-bottom: 20px;
+/* 5. אלמנטים כלליים */
+.container {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* 6. כלל למניעת בעיות רווחים בצדדים */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* אם יש אלמנטים נוספים שמייצרים בעיות, אפשר להוסיף להם כללים מותאמים כאן */
+
+/* סגנון לדף הבית */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+  width: 100%; /* תופס את כל הרוחב */
+  overflow-x: hidden; /* מונע גלילה אופקית */
+}
+
+/* כותרת */
+.home-header {
+  z-index: 10;
+}
+
+.home-header h1 {
+  color: white;
+  font-size: 6rem;
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
 /* כפתורים */
-button {
-  background-color: #007bff;
+.home-button {
+  background-color: #1d4ed8;
   color: white;
-  padding: 12px 24px;
+  padding: 15px 30px;
   font-size: 1.2rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 25px;
+  margin: 10px;
   transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #0056b3;
+.home-button:hover {
+  background-color: #2563eb;
 }
 
-/* טופס התחברות/הרשמה */
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
-}
-
-input[type="submit"] {
-  background-color: #28a745;
+/* פוטר */
+footer {
+  background-color: #1d4ed8;
   color: white;
-  cursor: pointer;
-}
-
-input[type="submit"]:hover {
-  background-color: #218838;
+  padding: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
 }

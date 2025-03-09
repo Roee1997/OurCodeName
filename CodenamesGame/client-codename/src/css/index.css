@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    overflow: hidden;
+  }
+  .Header {
+    margin-bottom: 20px; /* מרווח בין הכותרת לטופס */
+  }

@@ -10,6 +10,7 @@ const cards = [
     { word: "כיסא", team: "blue" },
     { word: "שמש", team: "neutral" },
     { word: "תפוח", team: "black" },
+    
     // ... שאר הקלפים
   ];
   

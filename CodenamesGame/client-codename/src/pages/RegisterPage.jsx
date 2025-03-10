@@ -2,7 +2,7 @@ import React from 'react';
 import BackgroundImage from "../components/BackgroundImage";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import Register from '../components/Register';
+import Register from '../components/RegisterForm';
 import codenamesImage from '../assets/codename.webp';
 
 const RegisterPage = () => {

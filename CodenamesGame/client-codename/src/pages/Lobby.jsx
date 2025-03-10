@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // אם יש לך AuthContext שמנהל את המידע על המשתמש
 import BackgroundImage from "../components/BackgroundImage";
-import Header from "../components/Header";
+import MainHeadLine from "../components/MainHeadLine";
 import LoginButtons from "../components/LoginButtons";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
@@ -22,7 +22,7 @@ const Lobby = () => {
 
       {/* תוכן הדף */}
       <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-8 space-y-6">
-        <Header />
+        <MainHeadLine />
         
         {/* אזור ברוכים הבאים */}
         <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md text-center">

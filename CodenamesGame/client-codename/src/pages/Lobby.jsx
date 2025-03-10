@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // אם יש לך AuthContext שמנהל את המידע על המשתמש
 import BackgroundImage from "../components/BackgroundImage";
 import MainHeadLine from "../components/MainHeadLine";
+import Header from "../components/Header";
 import LoginButtons from "../components/LoginButtons";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
@@ -17,13 +18,16 @@ const Lobby = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col">
+      <Header /> {/* ✅ הוספת הניווט בראש הדף */}
+
+      
       {/* רקע */}
       <BackgroundImage image={codenamesImage} />
 
       {/* תוכן הדף */}
       <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-8 space-y-6">
         <MainHeadLine />
-        
+
         {/* אזור ברוכים הבאים */}
         <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md text-center">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -46,10 +50,10 @@ const Lobby = () => {
       {/* פוטר */}
       <Footer className="mt-auto" />
 
-     {/* כפתור התנתקות */}
-<div className="absolute top-4 right-4 z-50">
-  <LogoutButton />
-</div>
+      {/* כפתור התנתקות */}
+      <div className="absolute top-4 right-4 z-50">
+        <LogoutButton />
+      </div>
     </div>
   );
 };

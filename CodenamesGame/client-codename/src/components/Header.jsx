@@ -14,10 +14,10 @@ const Header = () => {
       </div>
 
       {/* תפריט ניווט */}
-      <nav className="flex space-x-4">
-        <Link to="/" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">בית</Link>
-        {user && <Link to="/lobby" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">לובי</Link>}
+      <nav className="flex space-x-4 " dir="rtl">
         {user && <Link to="/game" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">משחק</Link>}
+        <Link to="/friends" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">חברים</Link>
+        <Link to="/rules" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">חוקים</Link>
       </nav>
 
       {/* כפתור התחברות/התנתקות */}

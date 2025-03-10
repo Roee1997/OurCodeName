@@ -1,8 +1,8 @@
 import React from 'react';
 import BackgroundImage from "../components/BackgroundImage";
 import Footer from "../components/Footer";
+import Register from '../components/RegisterForm';
 import MainHeadLine from "../components/MainHeadLine";
-import Register from '../components/Register';
 import codenamesImage from '../assets/codename.webp';
 
 const RegisterPage = () => {

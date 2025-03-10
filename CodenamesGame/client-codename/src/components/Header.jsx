@@ -1,18 +1,34 @@
-import React from 'react';
-import titleImage from '../assets/logo-codenames.webp'; // התמונה החדשה שאתה רוצה להוסיף ככותרת
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import LogoutButton from "./LogoutButton";
 
 const Header = () => {
+  const { user } = useAuth(); // קבלת המידע על המשתמש
+
   return (
-    <div className="w-full flex flex-col items-center text-center mb-4">
-      <img
-        src={titleImage}
-        alt="Codenames Title"
-        className="max-w-[300px] sm:max-w-[400px] md:max-w-[500px] h-auto object-contain"
-      />
-      <p className="text-lg sm:text-xl font-light italic text-white drop-shadow-md mt-2">
-        משחק קבוצתי חכם וממכר, אתגרו את המחשבה שלכם עם רמזים חכמים
-      </p>
-    </div>
+    <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">
+      {/* לוגו וטקסט */}
+      <div className="text-2xl font-bold">
+        <Link to="/">🎲 Codenames</Link>
+      </div>
+
+      {/* תפריט ניווט */}
+      <nav className="flex space-x-4">
+        <Link to="/" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">בית</Link>
+        {user && <Link to="/lobby" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">לובי</Link>}
+        {user && <Link to="/game" className="px-4 py-2 rounded-lg hover:bg-gray-700 transition">משחק</Link>}
+      </nav>
+
+      {/* כפתור התחברות/התנתקות */}
+      <div>
+        {user ? <LogoutButton /> : (
+          <Link to="/login" className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition">
+            התחברות
+          </Link>
+        )}
+      </div>
+    </header>
   );
 };
 

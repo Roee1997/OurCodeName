@@ -3,6 +3,8 @@ import BackgroundImage from "../components/BackgroundImage";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Register from '../components/RegisterForm';
+import MainHeadLine from "../components/MainHeadLine";
+import Register from '../components/Register';
 import codenamesImage from '../assets/codename.webp';
 
 const RegisterPage = () => {
@@ -13,7 +15,7 @@ const RegisterPage = () => {
 
           {/* תוכן ממורכז */}
           <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-4">
-            <Header />
+            <MainHeadLine />
             <Register/>
           </div>
 

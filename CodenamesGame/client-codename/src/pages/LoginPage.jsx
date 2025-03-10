@@ -2,7 +2,7 @@ import React from "react";
 import LoginForm from "../components/LoginForm";
 import BackgroundImage from "../components/BackgroundImage";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
+import MainHeadLine from "../components/MainHeadLine";
 import codenamesImage from '../assets/codename.webp';
 
 const LoginPage = () => {
@@ -13,7 +13,7 @@ const LoginPage = () => {
 
           {/* תוכן ממורכז */}
           <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-4">
-            <Header />
+            <MainHeadLine />
             <LoginForm />
           </div>
 

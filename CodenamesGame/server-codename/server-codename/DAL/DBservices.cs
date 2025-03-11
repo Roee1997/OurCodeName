@@ -2,7 +2,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace server-codname.DAL
+namespace server_codename.DAL
 {
     public class DBservices
     {

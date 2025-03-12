@@ -3,37 +3,65 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 
 const API_BASE_URL = "http://localhost:5150/api/users"; // ✅ Adjust for your API
 
-// 🔹 Register User (Firebase + SQL Server)
-export const registerUser = async (username, email, password) => {
+// 🔹 Register User (First Check Username in SQL, Then Register in Firebase)
+export async function registerUser(username, email, password) {
   try {
-    // 🔹 Step 1: Register user in Firebase
+    // 🔹 Step 1: Check if the Username is available in SQL Server
+    const usernameCheckResponse = await fetch(`${API_BASE_URL}/check-username/${username}`);
+
+    if (!usernameCheckResponse.ok) {
+      const errorData = await usernameCheckResponse.json();
+      throw new Error(errorData.message || "⚠️ הכינוי כבר תפוס, בחר כינוי אחר.");
+    }
+
+    // 🔹 Step 2: Register the user in Firebase
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     console.log("✅ Firebase user created:", user.uid);
 
-    // 🔹 Step 2: Send user data to SQL Server
+    // 🔹 Step 3: Send user data to SQL Server
     const response = await fetch(`${API_BASE_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        UserID: user.uid,  // 🔹 Firebase User ID
-        Username: username, // 🔹 Custom username from input
-        Email: email
+        UserID: user.uid,
+        Username: username,
+        Email: email,
       }),
     });
 
     if (!response.ok) {
-      throw new Error("❌ Failed to register user in SQL Server.");
+      const errorData = await response.json();
+
+      // 🔥 Step 4: If SQL registration fails, delete the Firebase user to prevent "ghost users"
+      await deleteUser(user);
+      throw new Error(errorData.message || "❌ Failed to register user in SQL Server.");
     }
 
     console.log("✅ User registered in SQL Server!");
     return user;
 
   } catch (error) {
-    console.error("❌ Firebase auth error:", error);
+    console.error("❌ Registration error:", error.message);
+
+    // 🔥 Step 5: If Firebase created the user but SQL failed, delete the user
+    if (auth.currentUser) {
+      await deleteUser(auth.currentUser);
+      console.log("🔥 Firebase user deleted due to SQL error.");
+    }
+
+    // 🔹 Handle Firebase "Email Already in Use" Error
+    if (error.code === "auth/email-already-in-use") {
+      throw new Error("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
+    }
+
+    if (error.message.includes("כינוי כבר קיים")) {
+      throw new Error("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
+    }
+
     throw error;
   }
-};
+}
 
 // 🔹 Login User
 export const loginUser = async (email, password) => {

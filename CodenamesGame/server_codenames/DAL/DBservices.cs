@@ -35,48 +35,73 @@ namespace Server_codenames.DAL
         // USER
         //--------------------------------------------------------------------------------------------------
         public bool RegisterUserDB(User user)
+{
+    SqlConnection con;
+    SqlCommand cmd;
+
+    try
+    {
+        con = connect("myProjDB"); // Create the connection
+    }
+    catch (Exception ex)
+    {
+        // Log the exception
+        throw new Exception("❌ Database connection failed.", ex);
+    }
+
+    // Dictionary to store parameters for the stored procedure
+    Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@UserID", user.UserID },
+        { "@Username", user.Username },
+        { "@Email", user.Email }
+    };
+
+    cmd = CreateCommandWithStoredProcedure("RegisterUser", con, paramDic); // Execute the stored procedure
+
+    try
+    {
+        int numEffected = cmd.ExecuteNonQuery();
+        return numEffected > 0; // Return true if the user was successfully inserted
+    }
+    catch (SqlException ex)
+    {
+        if (ex.Message.Contains("Username already exists"))
         {
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB"); // Create the connection
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                throw ex;
-            }
-
-            // Dictionary to store parameters for the stored procedure
-            Dictionary<string, object> paramDic = new Dictionary<string, object>
-            {
-                { "@UserID", user.UserID },
-                { "@Username", user.Username },
-                { "@Email", user.Email }
-            };
-
-            cmd = CreateCommandWithStoredProcedure("RegisterUser", con, paramDic); // Execute the stored procedure
-
-            try
-            {
-                int numEffected = cmd.ExecuteNonQuery();
-                return numEffected > 0; // Return true if the user was successfully inserted
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close(); // Close the DB connection
-                }
-            }
+            throw new Exception("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
         }
+        else if (ex.Message.Contains("Email already exists"))
+        {
+            throw new Exception("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
+        }
+        else
+        {
+            throw new Exception("❌ שגיאה בשרת. נסה שוב מאוחר יותר.", ex);
+        }
+    }
+    finally
+    {
+        if (con != null)
+        {
+            con.Close(); // Close the DB connection
+        }
+    }
+    
+}
+public bool DoesUsernameExistDB(string username)
+{
+    using (var connection = connect("myProjDB"))
+    {
+        Dictionary<string, object> paramUsername = new Dictionary<string, object>
+        {
+            { "@Username", username }
+        };
+
+        SqlCommand cmd = CreateCommandWithStoredProcedure("DoesUsernameExist", connection, paramUsername);
+        int exists = (int)cmd.ExecuteScalar();
+        return exists == 1; // ✅ Returns true if username exists, false otherwise
+    }
+}
         //---------------------------------------------------------------------------------
         // Create the SqlCommand using a stored procedure
         //---------------------------------------------------------------------------------

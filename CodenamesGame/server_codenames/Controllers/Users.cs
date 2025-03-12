@@ -11,11 +11,22 @@ namespace server_codenames.Controllers
     public class Users : ControllerBase
     {
         // GET: api/<Users>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+       [HttpGet("check-username/{username}")]
+public IActionResult CheckUsername(string username)
+{
+    try
+    {
+        DBservices dbs = new DBservices();
+        bool usernameExists = dbs.DoesUsernameExistDB(username);
+        return usernameExists
+            ? BadRequest(new { message = "⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר." })
+            : Ok(new { message = "✅ כינוי זמין." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "❌ שגיאה בשרת." });
+    }
+}
 
         // GET api/<Users>/5
         [HttpGet("{id}")]
@@ -26,13 +37,20 @@ namespace server_codenames.Controllers
 
         // POST api/<Users>
         [HttpPost("register")]
-        public IActionResult RegisterUser([FromBody] User user)
-        {
-            bool isRegistered = user.RegisterUser();
-            return isRegistered
-                ? Ok(new { message = "User registered successfully!" })
-                : BadRequest(new { message = "User registration failed!" });
-        }
+public IActionResult RegisterUser([FromBody] User user)
+{
+    try
+    {
+        bool isRegistered =  user.RegisterUser();
+        return isRegistered 
+            ? Ok(new { message = "User registered successfully!" }) 
+            : BadRequest(new { message = "User registration failed!" });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { message = ex.Message });
+    }
+}
 
         // PUT api/<Users>/5
         [HttpPut("{id}")]

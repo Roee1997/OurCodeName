@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/auth.css"; 
 
 const RegisterForm = () => {
-  const [username, setUsername] = useState(""); // ✅ הוספת כינוי
+  const [username, setUsername] = useState(""); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); 
@@ -20,16 +20,22 @@ const RegisterForm = () => {
       const user = await registerUser(username, email, password);
       console.log("✅ User registered successfully:", user);
       alert("ההרשמה הצליחה!");
-      navigate("/Lobby"); 
+      navigate("/Lobby");
 
     } catch (error) {
-      console.error("❌ Registration error:", error.code || error.message);
-      setError("❌ שגיאה בהרשמה. נסה שוב מאוחר יותר.");
+      console.error("❌ Registration error:", error.message);
+
+      if (error.message.includes("כינוי כבר קיים")) {
+        setError("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
+      } else if (error.message.includes("האימייל כבר קיים")) {
+        setError("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
+      } else {
+        setError("❌ שגיאה בהרשמה. נסה שוב מאוחר יותר.");
+      }
     }
 
     setLoading(false);
   };
-
   return (
     <div>
       <div className="relative z-10 bg-gradient-to-r from-gray-800 via-gray-900 to-black p-8 rounded-xl shadow-2xl w-96 mx-auto mt-12">
@@ -38,7 +44,7 @@ const RegisterForm = () => {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleRegister}>
-          {/* 🔹 שדה כינוי */}
+          {/* 🔹 Username Field */}
           <div className="mb-4">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="username">כינוי</label>
             <input
@@ -51,7 +57,7 @@ const RegisterForm = () => {
             />
           </div>
 
-          {/* 🔹 שדה אימייל */}
+          {/* 🔹 Email Field */}
           <div className="mb-4">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="email">אימייל</label>
             <input
@@ -64,7 +70,7 @@ const RegisterForm = () => {
             />
           </div>
 
-          {/* 🔹 שדה סיסמה */}
+          {/* 🔹 Password Field */}
           <div className="mb-6">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="password">סיסמה</label>
             <input

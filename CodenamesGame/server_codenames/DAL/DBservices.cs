@@ -1,6 +1,7 @@
 ﻿using server_codenames.BL;
 using System.Data.SqlClient;
 using System.Data;
+using server_codenames.Controllers;
 
 namespace Server_codenames.DAL
 {
@@ -31,9 +32,76 @@ namespace Server_codenames.DAL
         }
 
         //--------------------------------------------------------------------------------------------------
-        // Books
+        // USER
         //--------------------------------------------------------------------------------------------------
+        public bool RegisterUserDB(User user)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
 
+            try
+            {
+                con = connect("myProjDB"); // Create the connection
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw ex;
+            }
+
+            // Dictionary to store parameters for the stored procedure
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+            {
+                { "@UserID", user.UserID },
+                { "@Username", user.Username },
+                { "@Email", user.Email }
+            };
+
+            cmd = CreateCommandWithStoredProcedure("RegisterUser", con, paramDic); // Execute the stored procedure
+
+            try
+            {
+                int numEffected = cmd.ExecuteNonQuery();
+                return numEffected > 0; // Return true if the user was successfully inserted
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close(); // Close the DB connection
+                }
+            }
+        }
+        //---------------------------------------------------------------------------------
+        // Create the SqlCommand using a stored procedure
+        //---------------------------------------------------------------------------------
+        private SqlCommand CreateCommandWithStoredProcedure(String spName, SqlConnection con, Dictionary<string, object> paramDic)
+        {
+
+            SqlCommand cmd = new SqlCommand(); // create the command object
+
+            cmd.Connection = con;              // assign the connection to the command object
+
+            cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
+
+            cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
+
+            cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
+
+            //check if Dictionary not null and add to cmd
+            if (paramDic != null)
+                foreach (KeyValuePair<string, object> param in paramDic)
+                {
+                    cmd.Parameters.AddWithValue(param.Key, param.Value);
+
+                }
+            return cmd;
+        }
 
 
     }

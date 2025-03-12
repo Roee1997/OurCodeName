@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using server_codenames.BL;
+using Server_codenames.DAL;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,9 +25,13 @@ namespace server_codenames.Controllers
         }
 
         // POST api/<Users>
-        [HttpPost]
-        public void Post([FromBody]string value)
+        [HttpPost("register")]
+        public IActionResult RegisterUser([FromBody] User user)
         {
+            bool isRegistered = user.RegisterUser();
+            return isRegistered
+                ? Ok(new { message = "User registered successfully!" })
+                : BadRequest(new { message = "User registration failed!" });
         }
 
         // PUT api/<Users>/5

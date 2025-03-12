@@ -11,12 +11,12 @@ try
     using (SqlConnection conn = new SqlConnection(connectionString))
     {
         conn.Open();
-        Console.WriteLine("✅ התחברת בהצלחה למסד הנתונים!");
+        Console.WriteLine(" התחברת בהצלחה למסד הנתונים!");
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine("❌ שגיאה בהתחברות ל-SQL: " + ex.Message);
+    Console.WriteLine(" שגיאה בהתחברות ל-SQL: " + ex.Message);
 }
 
 // Add services to the container.

@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute"; // הקומפוננטה ששומרת על עמודים מוגנים
 import './css/App.css';
+import Friends from "./pages/Friends";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/lobby" element={<LobbyPage />} />
             <Route path="/game" element={<Game />} />
+            <Route path="/friends" element={<Friends />} />
           </Route>
           <Route path="*" element={<Home />} />
         </Routes>

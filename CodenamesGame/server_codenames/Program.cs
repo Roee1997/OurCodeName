@@ -10,17 +10,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // 🔹 Configure Kestrel to Listen on Both HTTP (5150) and HTTPS (5001)
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenLocalhost(5150); // ✅ Add HTTP support
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenLocalhost(5150); // ✅ Add HTTP support
 
-    options.ListenLocalhost(5001, listenOptions =>
-    {
-        listenOptions.UseHttps(Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".aspnet/https/aspnetcore.pfx"));
-    });
-});
+//    options.ListenLocalhost(5001, listenOptions =>
+//    {
+//        listenOptions.UseHttps(Path.Combine(
+//            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+//            ".aspnet/https/aspnetcore.pfx"));
+//    });
+//});
 
 // 🔹 Enable CORS (Allow Frontend to Access API)
 builder.Services.AddCors(options =>

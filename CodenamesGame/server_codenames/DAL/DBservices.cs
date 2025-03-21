@@ -33,6 +33,44 @@ namespace Server_codenames.DAL
         //--------------------------------------------------------------------------------------------------
         // PLAYER IN GAME
         //--------------------------------------------------------------------------------------------------
+        public List<PlayerInGame> GetPlayersInGame(int gameId)
+{
+    List<PlayerInGame> players = new List<PlayerInGame>();
+    SqlConnection con = null;
+
+    try
+    {
+        con = connect("myProjDB");
+
+        SqlCommand cmd = new SqlCommand("sp_GetPlayersInGame", con);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("@GameID", gameId);
+
+        SqlDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            PlayerInGame player = new PlayerInGame
+            {
+                UserID = reader["UserID"].ToString(),
+                
+                Team = reader["Team"].ToString(),
+                IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"])
+            };
+            players.Add(player);
+        }
+
+        return players;
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+    finally
+    {
+        if (con != null)
+            con.Close();
+    }
+}
         public bool JoinGame(PlayerInGame player)
         {
             SqlConnection con;

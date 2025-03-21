@@ -8,24 +8,30 @@ import LoginButtons from "../components/LoginButtons";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
 import LogoutButton from "../components/LogoutButton";
+import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
   const { user, logout } = useAuth(); // גישה למידע על המשתמש המחובר
-
+  const navigate = useNavigate(); // ✅ כאן אתה מגדיר את הפונקציה
   if (!user) {
     // אם המשתמש לא מחובר, להחזיר אותו לדף הבית או להתחברות
     return <p>יש להתחבר כדי לגשת לדף זה.</p>;
   }
   const handleCreateGame = async () => {
     try {
-      const response = await fetch("https://localhost:5150/api/games", {
+      const gamePayload = {
+        CreatedBy: user.uid,
+        Status: "Waiting",        // ⬅️ מומלץ לשים "Waiting"
+        CreationDate: null,
+        WinningTeam: null,
+        GameID: null
+      };
+      const response = await fetch("http://localhost:5150/api/games", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          createdBy: user.uid // או user.email לפי מה ששמרת ב-SQL
-        })
+        body: JSON.stringify(gamePayload)
       });
   
       if (!response.ok) {
@@ -35,7 +41,6 @@ const Lobby = () => {
       const data = await response.json();
       const gameId = data.gameID;
   
-      // ⬅️ ניווט ללובי של המשחק החדש
       navigate(`/game-lobby/${gameId}`);
     } catch (error) {
       console.error("שגיאה ביצירת משחק:", error);

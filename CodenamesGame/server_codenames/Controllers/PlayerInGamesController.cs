@@ -33,23 +33,23 @@ namespace server_codenames.Controllers
             }
         }
         // POST api/<PlayerInGamesController>
-        [HttpPost("{gameId}/join")]
-        public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
-        {
-            try
-            {
-                player.GameID = gameId;
-                bool success = player.JoinGame();
-                if (success)
-                    return Ok();
-                else
-                    return BadRequest("Failed to join the game.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+        
+       
+[HttpPost("{gameId}/join")]
+public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
+{
+    try
+    {
+        player.GameID = gameId; // ליתר ביטחון, תעדכן מ־URL
+
+        bool success = player.JoinGame();
+        return success ? Ok() : BadRequest("ההצטרפות נכשלה");
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
 
         // PUT api/<PlayerInGamesController>/5
         [HttpPut("{id}")]

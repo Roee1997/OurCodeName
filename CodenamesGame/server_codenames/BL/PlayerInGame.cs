@@ -6,17 +6,17 @@ namespace server_codenames.BL
     {
         public int GameID { get; set; }
         public string UserID { get; set; }
-        public string Username { get; set; }
+    
         public string Team { get; set; }
         public bool IsSpymaster { get; set; }
 
         public PlayerInGame() { }
 
-        public PlayerInGame(int gameID, string userID, string username, string team, bool isSpymaster)
+        public PlayerInGame(int gameID, string userID,  string team, bool isSpymaster)
         {
             GameID = gameID;
             UserID = userID;
-            Username = username;
+            
             Team = team;
             IsSpymaster = isSpymaster;
         }
@@ -26,5 +26,10 @@ namespace server_codenames.BL
             DBservices dbs = new DBservices();
             return dbs.JoinGame(this);
         }
+        public static List<PlayerInGame> GetPlayersInGame(int gameId)
+{
+    DBservices dbs = new DBservices();
+    return dbs.GetPlayersInGame(gameId);
+}
     }
 }

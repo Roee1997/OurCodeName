@@ -30,7 +30,96 @@ namespace Server_codenames.DAL
             con.Open();
             return con;
         }
+        //--------------------------------------------------------------------------------------------------
+        // PLAYER IN GAME
+        //--------------------------------------------------------------------------------------------------
+        public bool JoinGame(PlayerInGame player)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
 
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                Dictionary<string, object> paramDic = new Dictionary<string, object>
+        {
+            { "@GameID", player.GameID },
+            { "@UserID", player.UserID },
+            { "@Team", player.Team },
+            { "@IsSpymaster", player.IsSpymaster }
+        };
+
+                cmd = CreateCommandWithStoredProcedure("sp_JoinGame", con, paramDic);
+                int affected = cmd.ExecuteNonQuery();
+                return affected > 0;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
+        //--------------------------------------------------------------------------------------------------
+        // GAME
+        //--------------------------------------------------------------------------------------------------
+        public int CreateGame(Game game)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB"); // יצירת החיבור
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                cmd = new SqlCommand("sp_CreateGame", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // קלט
+                cmd.Parameters.AddWithValue("@CreatedBy", game.CreatedBy);
+
+                // פלט
+                SqlParameter outputParam = new SqlParameter("@GameID", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.Output
+                };
+                cmd.Parameters.Add(outputParam);
+
+                cmd.ExecuteNonQuery();
+
+                // החזרת GameID שנוצר
+                return (int)outputParam.Value;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
         //--------------------------------------------------------------------------------------------------
         // USER
         //--------------------------------------------------------------------------------------------------

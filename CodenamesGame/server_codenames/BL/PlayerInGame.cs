@@ -26,5 +26,11 @@ namespace server_codenames.BL
             DBservices dbs = new DBservices();
             return dbs.JoinGame(this);
         }
+        public static List<PlayerInGame> GetPlayersInGame(int gameId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetPlayersInGame(gameId);
+
+        }
     }
 }

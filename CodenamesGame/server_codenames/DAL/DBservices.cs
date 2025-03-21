@@ -35,73 +35,125 @@ namespace Server_codenames.DAL
         // USER
         //--------------------------------------------------------------------------------------------------
         public bool RegisterUserDB(User user)
-{
-    SqlConnection con;
-    SqlCommand cmd;
+        {
+            SqlConnection con;
+            SqlCommand cmd;
 
-    try
-    {
-        con = connect("myProjDB"); // Create the connection
-    }
-    catch (Exception ex)
-    {
-        // Log the exception
-        throw new Exception("❌ Database connection failed.", ex);
-    }
+            try
+            {
+                con = connect("myProjDB"); // Create the connection
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw new Exception("❌ Database connection failed.", ex);
+            }
 
-    // Dictionary to store parameters for the stored procedure
-    Dictionary<string, object> paramDic = new Dictionary<string, object>
+            // Dictionary to store parameters for the stored procedure
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
     {
         { "@UserID", user.UserID },
         { "@Username", user.Username },
         { "@Email", user.Email }
     };
 
-    cmd = CreateCommandWithStoredProcedure("RegisterUser", con, paramDic); // Execute the stored procedure
+            cmd = CreateCommandWithStoredProcedure("RegisterUser", con, paramDic); // Execute the stored procedure
 
-    try
-    {
-        int numEffected = cmd.ExecuteNonQuery();
-        return numEffected > 0; // Return true if the user was successfully inserted
-    }
-    catch (SqlException ex)
-    {
-        if (ex.Message.Contains("Username already exists"))
-        {
-            throw new Exception("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
+            try
+            {
+                int numEffected = cmd.ExecuteNonQuery();
+                return numEffected > 0; // Return true if the user was successfully inserted
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Username already exists"))
+                {
+                    throw new Exception("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
+                }
+                else if (ex.Message.Contains("Email already exists"))
+                {
+                    throw new Exception("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
+                }
+                else
+                {
+                    throw new Exception("❌ שגיאה בשרת. נסה שוב מאוחר יותר.", ex);
+                }
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close(); // Close the DB connection
+                }
+            }
+
         }
-        else if (ex.Message.Contains("Email already exists"))
+        public bool DoesUsernameExistDB(string username)
         {
-            throw new Exception("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
-        }
-        else
-        {
-            throw new Exception("❌ שגיאה בשרת. נסה שוב מאוחר יותר.", ex);
-        }
-    }
-    finally
-    {
-        if (con != null)
-        {
-            con.Close(); // Close the DB connection
-        }
-    }
-    
-}
-public bool DoesUsernameExistDB(string username)
-{
-    using (var connection = connect("myProjDB"))
-    {
-        Dictionary<string, object> paramUsername = new Dictionary<string, object>
+            using (var connection = connect("myProjDB"))
+            {
+                Dictionary<string, object> paramUsername = new Dictionary<string, object>
         {
             { "@Username", username }
         };
 
-        SqlCommand cmd = CreateCommandWithStoredProcedure("DoesUsernameExist", connection, paramUsername);
-        int exists = (int)cmd.ExecuteScalar();
-        return exists == 1; // ✅ Returns true if username exists, false otherwise
-    }
-}
+                SqlCommand cmd = CreateCommandWithStoredProcedure("DoesUsernameExist", connection, paramUsername);
+                int exists = (int)cmd.ExecuteScalar();
+                return exists == 1; // ✅ Returns true if username exists, false otherwise
+            }
+        }
+
+
+    //    public User SearchUserDB(string query)
+    //    {
+    //        SqlConnection con;
+    //        SqlCommand cmd;
+
+    //        try
+    //        {
+    //            con = connect("myProjDB"); // יצירת חיבור למסד הנתונים
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw new Exception("❌ Database connection failed.", ex);
+    //        }
+
+    //        // מילון פרמטרים לשאילתה
+    //        Dictionary<string, object> paramDic = new Dictionary<string, object>
+    //{
+    //    { "@Query", query }
+    //};
+
+    //        cmd = CreateCommandWithStoredProcedure("GetUserByUsernameOrID", con, paramDic); // הרצת פרוצדורה
+
+    //        try
+    //        {
+    //            SqlDataReader reader = cmd.ExecuteReader();
+
+    //            if (reader.Read()) // אם נמצא משתמש, מחזירים אובייקט
+    //            {
+    //                return new User
+    //                {
+    //                    UserID = reader.GetInt32(0),
+    //                    Username = reader.GetString(1),
+    //                    Email = reader.GetString(2)
+    //                };
+    //            }
+    //            return null; // אם לא נמצא משתמש
+    //        }
+    //        catch (SqlException ex)
+    //        {
+    //            throw new Exception("❌ שגיאה בבדיקת המשתמש.", ex);
+    //        }
+    //        finally
+    //        {
+    //            if (con != null)
+    //            {
+    //                con.Close(); // סגירת חיבור
+    //            }
+    //        }
+    //    }
+
         //---------------------------------------------------------------------------------
         // Create the SqlCommand using a stored procedure
         //---------------------------------------------------------------------------------
@@ -127,6 +179,9 @@ public bool DoesUsernameExistDB(string username)
                 }
             return cmd;
         }
+
+
+
 
 
     }

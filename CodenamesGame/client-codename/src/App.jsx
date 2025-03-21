@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute"; // הקומפוננטה ששומרת על עמודים מוגנים
 import './css/App.css';
 import Friends from "./pages/Friends";
+import GameLobby from "./pages/GameLobby.jsx"; // ⬅️ הוסף את זה למעלה
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/lobby" element={<LobbyPage />} />
             <Route path="/game" element={<Game />} />
+            <Route path="/game-lobby/:gameId" element={<GameLobby />} /> {/* ✅ חדש */}
             <Route path="/friends" element={<Friends />} />
           </Route>
           <Route path="*" element={<Home />} />

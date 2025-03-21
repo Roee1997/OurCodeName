@@ -23,8 +23,8 @@ namespace server_codenames.Controllers
         {
             try
             {
-                DBservices dbs = new DBservices();
-                List<PlayerInGame> players = dbs.GetPlayersInGame(gameId);
+               
+                List<PlayerInGame> players = PlayerInGame.GetPlayersInGame(gameId);
                 return Ok(players);
             }
             catch (Exception ex)

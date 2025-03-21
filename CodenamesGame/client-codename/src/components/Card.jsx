@@ -1,38 +1,45 @@
-import React, { useState } from "react";
+import { motion } from "framer-motion";
+import React from "react";
+import assassinImg from "../assets/assasin.jpg";
+import blueTeamImg from "../assets/blueteam.jpeg";
+import neutralImg from "../assets/neutral.jpeg";
+import redTeamImg from "../assets/redteam.jpeg";
 
-const Card = ({ word, team }) => {
-  const [revealed, setRevealed] = useState(false);
-
-  // קביעת צבע הקלף לפי הצוות
+const Card = ({ word, team, revealed, onReveal }) => {
   const getCardImage = () => {
     switch (team) {
       case "red":
-        return "url('../assets/redteam.jpeg')"; // שנה את הנתיב לתמונה שלך
+        return redTeamImg;
       case "blue":
-        return "url('../assets/blueteam.jpeg')"; // שנה את הנתיב לתמונה שלך
+        return blueTeamImg;
       case "neutral":
-        return "url('../assets/neutral.jpeg')"; // שנה את הנתיב לתמונה שלך
+        return neutralImg;
       case "black":
-        return "url('../assets/assasin.jpg')"; // שנה את הנתיב לתמונה שלך
+        return assassinImg;
       default:
-        return "bg-white";
+        return "";
     }
   };
 
   return (
-    <div
-      className={`w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 flex justify-center items-center rounded-lg shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 transform`}
-      onClick={() => setRevealed(true)} // עדכון מצב revealed בלחיצה
+    <motion.div
+      className="w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 flex justify-center items-center rounded-lg shadow-lg cursor-pointer transition-all duration-300 hover:scale-105"
+      onClick={onReveal}
+      initial={{ rotateY: 0 }}
+      animate={{ rotateY: revealed ? 180 : 0 }}
+      transition={{ duration: 0.6 }}
       style={{
-        backgroundImage: revealed ? getCardImage() : "none", // הצגת התמונה רק לאחר הלחיצה
-        backgroundSize: "cover", // התמונה ממלאת את כל הקונטיינר
-        backgroundPosition: "center", // התמונה ממוקמת במרכז
+        backgroundImage: revealed ? `url(${getCardImage()})` : "none",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundColor: revealed ? "transparent" : (team === "red" ? "#ffdddd" : team === "blue" ? "#ddddff" : "#eeeeee"),
+        border: "1px solid black",
       }}
     >
       {!revealed && (
         <div className="text-center font-bold text-lg text-black">{word}</div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

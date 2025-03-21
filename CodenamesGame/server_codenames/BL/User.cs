@@ -31,6 +31,12 @@ namespace server_codenames.BL
             return dbs.RegisterUserDB(this);
         }
 
+        public bool DoesUsernameExist()
+        {
+            DBservices dbs = new DBservices(); // Create DB services instance
+            return dbs.DoesUsernameExistDB(this.Username); // Pass the current username
+        }
+
 
 
     }

@@ -31,16 +31,32 @@ const FriendSearch = () => {
   };
 
   const handleSendRequest = async () => {
+    if (!searchResult) return;
+  
     try {
-      await sendFriendRequest(searchResult.UserID);
-      setSuccessMessage("Friend request sent!");
-      setSearchResult(null);
-      setSearchTerm("");
+      const response = await axios.post("http://localhost:5173/api/friends/request", {
+        senderID: "4KA4OGBZjodxgSD0yrx4c1fXOrx1",
+        receiverQuery: searchResult.Username,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        }
+      });
+  
+      setMessage(response.data.message);
     } catch (error) {
-      console.error("Send request error:", error);
-      setErrorMessage("Failed to send friend request.");
+      console.error("🚨 Error in request:", error.response || error);
+  
+      if (error.response?.data?.message) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage("❌ Error occurred while sending friend request.");
+      }
     }
   };
+  
+  
 
   return (
     <div className="mb-6">

@@ -103,56 +103,62 @@ namespace Server_codenames.DAL
             }
         }
 
+        public string SendFriendRequestDB(string senderId, string receiverQuery)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
 
-    //    public User SearchUserDB(string query)
-    //    {
-    //        SqlConnection con;
-    //        SqlCommand cmd;
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ Failed to connect: " + ex.Message);
+                throw new Exception("Database connection failed.", ex);
+            }
 
-    //        try
-    //        {
-    //            con = connect("myProjDB"); // יצירת חיבור למסד הנתונים
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            throw new Exception("❌ Database connection failed.", ex);
-    //        }
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@SenderID", senderId },
+        { "@ReceiverQuery", receiverQuery }
+    };
 
-    //        // מילון פרמטרים לשאילתה
-    //        Dictionary<string, object> paramDic = new Dictionary<string, object>
-    //{
-    //    { "@Query", query }
-    //};
+            cmd = CreateCommandWithStoredProcedure("SendFriendRequest", con, paramDic);
 
-    //        cmd = CreateCommandWithStoredProcedure("GetUserByUsernameOrID", con, paramDic); // הרצת פרוצדורה
+            try
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        string result = reader["Result"].ToString();
+                        System.Diagnostics.Debug.WriteLine("📥 Result from SQL: " + result);
+                        return result;
+                    }
+                }
 
-    //        try
-    //        {
-    //            SqlDataReader reader = cmd.ExecuteReader();
+                return "NoResponse";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("❌ SQL Error: " + ex.Message);
+                throw;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                    System.Diagnostics.Debug.WriteLine("🔄 Connection closed.");
+                }
+            }
+        }
 
-    //            if (reader.Read()) // אם נמצא משתמש, מחזירים אובייקט
-    //            {
-    //                return new User
-    //                {
-    //                    UserID = reader.GetInt32(0),
-    //                    Username = reader.GetString(1),
-    //                    Email = reader.GetString(2)
-    //                };
-    //            }
-    //            return null; // אם לא נמצא משתמש
-    //        }
-    //        catch (SqlException ex)
-    //        {
-    //            throw new Exception("❌ שגיאה בבדיקת המשתמש.", ex);
-    //        }
-    //        finally
-    //        {
-    //            if (con != null)
-    //            {
-    //                con.Close(); // סגירת חיבור
-    //            }
-    //        }
-    //    }
+
+
+
+
 
         //---------------------------------------------------------------------------------
         // Create the SqlCommand using a stored procedure
@@ -179,10 +185,5 @@ namespace Server_codenames.DAL
                 }
             return cmd;
         }
-
-
-
-
-
     }
 }

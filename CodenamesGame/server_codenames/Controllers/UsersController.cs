@@ -20,7 +20,7 @@ namespace server_codenames.Controllers
                 bool usernameExists = dbs.DoesUsernameExistDB(username);
                 return usernameExists
                     ? BadRequest(new { message = "⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר." })
-                    : Ok(new { message = "✅ כינוי זמין." });
+                    : Ok(new { message = "✅ כינוי זמין.." });
             }
             catch (Exception ex)
             {

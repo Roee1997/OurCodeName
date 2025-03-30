@@ -109,9 +109,52 @@ namespace Server_codenames.DAL
                     con.Close();
             }
         }
+
+
+        public bool UpdatePlayer(PlayerInGame player)
+{
+    SqlConnection con = connect("myProjDB");
+
+    Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@GameID", player.GameID },
+        { "@UserID", player.UserID },
+        { "@Team", player.Team },
+        { "@IsSpymaster", player.IsSpymaster }
+    };
+
+    SqlCommand cmd = CreateCommandWithStoredProcedure("sp_UpdatePlayer", con, paramDic);
+    int affected = cmd.ExecuteNonQuery();
+    con.Close();
+
+    return affected > 0;
+}
         //--------------------------------------------------------------------------------------------------
         // GAME
         //--------------------------------------------------------------------------------------------------
+        
+        
+        public bool IsGameJoinable(int gameId)
+{
+    SqlConnection con = connect("myProjDB");
+
+    Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@GameID", gameId }
+    };
+
+    SqlCommand cmd = CreateCommandWithStoredProcedure("sp_IsGameJoinable", con, paramDic);
+    SqlDataReader reader = cmd.ExecuteReader();
+
+    if (reader.Read())
+    {
+        return Convert.ToBoolean(reader["Joinable"]);
+    }
+
+    return false;
+}
+        
+        
         public int CreateGame(Game game)
         {
             SqlConnection con;

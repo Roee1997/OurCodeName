@@ -45,10 +45,11 @@ const GameLobby = () => {
 
   const becomeSpymaster = async (team) => {
     try {
-      await fetch(`http://localhost:5150/api/games/${gameId}/update-player`, {
+      await fetch(`http://localhost:5150/api/playeringames/${gameId}/update-player`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          gameID: parseInt(gameId),
           userID: user.uid,
           team: team,
           isSpymaster: true
@@ -57,6 +58,24 @@ const GameLobby = () => {
       fetchPlayers();
     } catch (error) {
       console.error("שגיאה בהפיכה לרמזן:", error);
+    }
+  };
+
+  const changeTeam = async (newTeam) => {
+    try {
+      await fetch(`http://localhost:5150/api/playeringames/${gameId}/update-player`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameID: parseInt(gameId),
+          userID: user.uid,
+          team: newTeam,
+          isSpymaster: false
+        })
+      });
+      fetchPlayers();
+    } catch (error) {
+      console.error("שגיאה בהחלפת קבוצה:", error);
     }
   };
 
@@ -91,17 +110,30 @@ const GameLobby = () => {
           <ul className="space-y-2">
             {redTeam.map(player => (
               <li key={player.userID}>
-                {player.userID === user.uid
-                  ? user.displayName || "אתה"
-                  : `שחקן (${player.userID.slice(0, 5)}...)`}
-                {player.isSpymaster && " 🕵️"}
-                {player.userID === user.uid && (
-                  <button
-                    onClick={() => becomeSpymaster("Red")}
-                    className="ml-2 text-sm text-blue-500 underline"
-                  >
-                    הפוך לרמזן
-                  </button>
+                {player.userID === user.uid ? (
+                  <>
+                    <span className="font-bold text-green-800">
+                      {user.displayName || "אתה"}
+                    </span>
+                    {player.isSpymaster && " 🕵️"}
+                    <button
+                      onClick={() => changeTeam("Blue")}
+                      className="ml-2 text-sm text-yellow-600 underline"
+                    >
+                      החלף לקבוצה 🔵
+                    </button>
+                    <button
+                      onClick={() => becomeSpymaster("Red")}
+                      className="ml-2 text-sm text-blue-500 underline"
+                    >
+                      הפוך לרמזן
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {`שחקן (${player.userID.slice(0, 5)}...)`}
+                    {player.isSpymaster && " 🕵️"}
+                  </>
                 )}
               </li>
             ))}
@@ -114,17 +146,30 @@ const GameLobby = () => {
           <ul className="space-y-2">
             {blueTeam.map(player => (
               <li key={player.userID}>
-                {player.userID === user.uid
-                  ? user.displayName || "אתה"
-                  : `שחקן (${player.userID.slice(0, 5)}...)`}
-                {player.isSpymaster && " 🕵️"}
-                {player.userID === user.uid && (
-                  <button
-                    onClick={() => becomeSpymaster("Blue")}
-                    className="ml-2 text-sm text-blue-500 underline"
-                  >
-                    הפוך לרמזן
-                  </button>
+                {player.userID === user.uid ? (
+                  <>
+                    <span className="font-bold text-green-800">
+                      {user.displayName || "אתה"}
+                    </span>
+                    {player.isSpymaster && " 🕵️"}
+                    <button
+                      onClick={() => changeTeam("Red")}
+                      className="ml-2 text-sm text-yellow-600 underline"
+                    >
+                      החלף לקבוצה 🔴
+                    </button>
+                    <button
+                      onClick={() => becomeSpymaster("Blue")}
+                      className="ml-2 text-sm text-blue-500 underline"
+                    >
+                      הפוך לרמזן
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {`שחקן (${player.userID.slice(0, 5)}...)`}
+                    {player.isSpymaster && " 🕵️"}
+                  </>
                 )}
               </li>
             ))}
@@ -136,3 +181,4 @@ const GameLobby = () => {
 };
 
 export default GameLobby;
+

@@ -16,12 +16,23 @@ namespace server_codenames.Controllers
             return new string[] { "value1", "value2" };
         }
 
-        // GET api/<GamesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET api/games/{gameId}/is-joinable
+        [HttpGet("{gameId}/is-joinable")]
+        public IActionResult IsGameJoinable(int gameId)
         {
-            return "value";
+            try
+            {
+                Game game = new Game();
+                bool isJoinable = game.IsGameJoinable(gameId);
+
+                return Ok(new { joinable = isJoinable });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
 
         // POST api/<GamesController>
         [HttpPost]

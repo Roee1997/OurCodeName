@@ -26,5 +26,12 @@ namespace server_codenames.BL
         DBservices dbs = new DBservices();
         return dbs.CreateGame(this);
     }
+
+      public bool IsGameJoinable(int gameId)
+      {
+         DBservices dbs = new DBservices();
+        return dbs.IsGameJoinable(gameId);
+
+      }
 }
 }

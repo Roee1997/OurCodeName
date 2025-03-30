@@ -21,6 +21,12 @@ namespace server_codenames.BL
             IsSpymaster = isSpymaster;
         }
 
+        public bool UpdatePlayer()
+{
+    DBservices dbs = new DBservices();
+    return dbs.UpdatePlayer(this);
+}
+
         public bool JoinGame()
         {
             DBservices dbs = new DBservices();

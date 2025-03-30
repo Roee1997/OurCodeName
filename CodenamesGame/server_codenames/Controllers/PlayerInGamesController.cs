@@ -51,11 +51,26 @@ public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
     }
 }
 
-        // PUT api/<PlayerInGamesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+     [HttpPut("{gameId}/update-player")]
+public IActionResult UpdatePlayer(int gameId, [FromBody] PlayerInGame player)
+{
+    try
+    {
+        player.GameID = gameId;
+        bool success = player.UpdatePlayer();
+
+        // ✅ החזר תשובה תקינה אם הצליח
+        if (success)
+            return Ok(new { message = "עודכן בהצלחה" });
+
+        // ❗ אם לא עודכן (affected == 0) – עדיין להחזיר תשובה תקינה כדי לא לשבור את React
+        return Ok(new { message = "לא בוצע שינוי, אבל אין שגיאה" });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
 
         // DELETE api/<PlayerInGamesController>/5
         [HttpDelete("{id}")]

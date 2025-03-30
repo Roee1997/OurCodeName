@@ -19,7 +19,7 @@ const GameLobby = () => {
       const data = await response.json();
       setPlayers(data);
     } catch (error) {
-      console.error("שגיאה בטעינת שחקנים:", error);
+      console.error("שגיאה בטעינת שחקנים:.", error);
     }
   };
 

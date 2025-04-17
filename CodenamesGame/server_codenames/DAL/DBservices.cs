@@ -71,6 +71,38 @@ namespace Server_codenames.DAL
             con.Close();
     }
 }
+public bool InsertCards(List<Card> cards)
+{
+    SqlConnection con = connect("myProjDB");
+
+    try
+    {
+        foreach (var card in cards)
+        {
+            SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
+            {            
+                { "@GameID", card.GameID },
+                { "@Word", card.Word },
+                { "@Team", card.Team },
+                { "@IsRevealed", card.IsRevealed }
+            });
+
+            cmd.ExecuteNonQuery();
+        }
+
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);  // <--- הוספה כאן
+        return false;
+    }
+    finally
+    {
+        con.Close();
+    }
+}
+
         public bool JoinGame(PlayerInGame player)
         {
             SqlConnection con;

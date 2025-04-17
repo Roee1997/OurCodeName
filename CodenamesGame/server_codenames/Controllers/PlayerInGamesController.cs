@@ -50,6 +50,36 @@ public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
         return BadRequest(new { error = ex.Message });
     }
 }
+    [HttpGet("{gameId}/is-ready")]
+public IActionResult IsGameReady(int gameId)
+{
+    try
+    {
+        List<PlayerInGame> players = PlayerInGame.GetPlayersInGame(gameId);
+
+        if (players.Count != 4)
+            return Ok(new { isReady = false });
+
+        var redTeam = players.Where(p => p.Team == "Red").ToList();
+        var blueTeam = players.Where(p => p.Team == "Blue").ToList();
+
+        bool redValid = redTeam.Count == 2 &&
+                        redTeam.Any(p => p.IsSpymaster) &&
+                        redTeam.Any(p => !p.IsSpymaster);
+
+        bool blueValid = blueTeam.Count == 2 &&
+                         blueTeam.Any(p => p.IsSpymaster) &&
+                         blueTeam.Any(p => !p.IsSpymaster);
+
+        bool isReady = redValid && blueValid;
+
+        return Ok(new { isReady });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
 
      [HttpPut("{gameId}/update-player")]
 public IActionResult UpdatePlayer(int gameId, [FromBody] PlayerInGame player)

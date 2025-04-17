@@ -48,6 +48,25 @@ namespace server_codenames.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        
+        [HttpPost("{gameId}/start")]
+    public IActionResult StartGame(int gameId)
+    {
+        try
+        {
+            var board = Card.GenerateBoard(gameId);
+            bool success = Card.SaveBoardToDb(board);
+
+            if (!success)
+                return BadRequest(new { message = "שגיאה בשמירת לוח המשחק" });
+
+            return Ok(new { message = "לוח נוצר בהצלחה", board });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
 
         // PUT api/<GamesController>/5

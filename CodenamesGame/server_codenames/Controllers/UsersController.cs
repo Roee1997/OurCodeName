@@ -37,7 +37,7 @@ namespace server_codenames.Controllers
 
         // POST api/<Users>
         [HttpPost("register")]
-        public IActionResult RegisterUser([FromBody] User user)
+        public IActionResult RegisterUser([FromBody] BL.Users user)
         {
             try
             {

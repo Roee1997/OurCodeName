@@ -204,7 +204,7 @@ namespace Server_codenames.DAL
         //--------------------------------------------------------------------------------------------------
         // USER
         //--------------------------------------------------------------------------------------------------
-        public bool RegisterUserDB(User user)
+        public bool RegisterUserDB(server_codenames.BL.Users user)
         {
             SqlConnection con;
             SqlCommand cmd;
@@ -273,6 +273,59 @@ namespace Server_codenames.DAL
             }
         }
 
+        //find user to add to friend list
+        public server_codenames.BL.Users GetUserByUsernameOrID_DB(string query)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database connection failed.", ex);
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@Query", query }
+    };
+
+            cmd = CreateCommandWithStoredProcedure("GetUserByUsernameOrID", con, paramDic);
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    server_codenames.BL.Users user = new server_codenames.BL.Users
+                    {
+                        UserID = reader["UserID"].ToString(),
+                        Username = reader["Username"].ToString(),
+                        Email = reader["Email"].ToString(),
+                        RegistrationDate = Convert.ToDateTime(reader["RegistrationDate"])
+                    };
+                    return user;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to read user.", ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
+
+
+
+
+        //create a pending friend request
         public string SendFriendRequestDB(string senderId, string receiverQuery)
         {
             SqlConnection con;
@@ -325,9 +378,138 @@ namespace Server_codenames.DAL
             }
         }
 
+        //get pending friend requests to users that I sent them.
+        public List<server_codenames.BL.Users> GetPendingFriendRequestsSent(string senderId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database connection failed.", ex);
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@SenderID", senderId }
+    };
+
+            cmd = CreateCommandWithStoredProcedure("GetPendingFriendRequestsSent", con, paramDic);
+
+            List<server_codenames.BL.Users> pending = new List<server_codenames.BL.Users>();
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    server_codenames.BL.Users u = new server_codenames.BL.Users
+                    {
+                        UserID = reader["ReceiverID"].ToString(),
+                        Username = reader["Username"].ToString(),
+                        Email = reader["Email"].ToString()
+                    };
+                    pending.Add(u);
+                }
+
+                return pending;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error reading pending friend requests.", ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
 
 
+        public List<server_codenames.BL.Users> GetPendingFriendRequestsReceived_DB(string receiverId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+            List<server_codenames.BL.Users> users = new List<server_codenames.BL.Users>();
 
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database connection failed.", ex);
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@ReceiverID", receiverId }
+    };
+
+            cmd = CreateCommandWithStoredProcedure("GetPendingFriendRequestsReceived", con, paramDic);
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    server_codenames.BL.Users u = new server_codenames.BL.Users
+                    {
+                        UserID = reader["UserID"].ToString(),
+                        Username = reader["Username"].ToString(),
+                        Email = reader["Email"].ToString()
+                    };
+                    users.Add(u);
+                }
+                return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to fetch pending friend requests.", ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
+
+        public string CancelFriendRequestDB(string senderId, string receiverId, string action)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try { con = connect("myProjDB"); }
+            catch (Exception ex) { throw new Exception("DB connection failed", ex); }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
+    {
+        { "@SenderID", senderId },
+        { "@ReceiverID", receiverId },
+        { "@Action", action }
+    };
+
+            cmd = CreateCommandWithStoredProcedure("CancelFriendRequest", con, paramDic);
+
+            try
+            {
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    return reader["Result"].ToString();
+                }
+                return "Error";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("❌ Failed to cancel/decline request", ex);
+            }
+            finally { if (con != null) con.Close(); }
+        }
 
 
         //---------------------------------------------------------------------------------

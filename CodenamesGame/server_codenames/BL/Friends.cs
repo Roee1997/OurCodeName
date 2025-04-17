@@ -18,6 +18,25 @@ namespace server_codenames.BL
         }
 
 
+        public static List<server_codenames.BL.Users> GetPendingSent(string senderId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetPendingFriendRequestsSent(senderId);
+        }
+
+
+        public static List<server_codenames.BL.Users> GetPendingReceived(string receiverId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetPendingFriendRequestsReceived_DB(receiverId);
+        }
+
+
+        public static string CancelFriendRequest(string senderId, string receiverId, string action)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.CancelFriendRequestDB(senderId, receiverId, action);
+        }
 
     }
 }

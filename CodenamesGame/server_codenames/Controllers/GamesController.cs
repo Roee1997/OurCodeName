@@ -48,7 +48,7 @@ namespace server_codenames.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-        
+
         [HttpPost("{gameId}/start")]
     public IActionResult StartGame(int gameId)
     {
@@ -68,6 +68,22 @@ namespace server_codenames.Controllers
         }
     }
 
+    [HttpPut("{gameId}/reveal/{cardId}")]
+    public IActionResult RevealCard(int gameId, int cardId)
+    {
+        try
+        {
+            bool success = Card.RevealCard(cardId);
+            if (!success)
+                return BadRequest(new { message = "הקלף לא נחשף" });
+
+            return Ok(new { message = "הקלף נחשף בהצלחה" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
         // PUT api/<GamesController>/5
         [HttpPut("{id}")]

@@ -55,5 +55,12 @@ namespace server_codenames.BL
             DBservices dbs = new DBservices();
             return dbs.InsertCards(board);
         }
+        
+        public static bool RevealCard(int cardId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.RevealCard(cardId);
+        }
+
     }
 }

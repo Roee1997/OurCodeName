@@ -33,7 +33,7 @@ namespace Server_codenames.DAL
         //--------------------------------------------------------------------------------------------------
         // PLAYER IN GAME
         //--------------------------------------------------------------------------------------------------
-        public List<PlayerInGame> GetPlayersInGame(int gameId)
+public List<PlayerInGame> GetPlayersInGame(int gameId)
 {
     List<PlayerInGame> players = new List<PlayerInGame>();
     SqlConnection con = null;
@@ -51,10 +51,11 @@ namespace Server_codenames.DAL
         {
             PlayerInGame player = new PlayerInGame
             {
+                GameID = gameId, 
                 UserID = reader["UserID"].ToString(),
-                
                 Team = reader["Team"].ToString(),
-                IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"])
+                IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"]),
+                Username = reader["Username"].ToString() // ✅ נוספה שליפת שם משתמש
             };
             players.Add(player);
         }
@@ -70,38 +71,50 @@ namespace Server_codenames.DAL
         if (con != null)
             con.Close();
     }
-}
-public bool InsertCards(List<Card> cards)
-{
-    SqlConnection con = connect("myProjDB");
-
-    try
+}    public bool InsertCards(List<Card> cards)
     {
-        foreach (var card in cards)
-        {
-            SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
-            {            
-                { "@GameID", card.GameID },
-                { "@Word", card.Word },
-                { "@Team", card.Team },
-                { "@IsRevealed", card.IsRevealed }
-            });
+        SqlConnection con = connect("myProjDB");
 
-            cmd.ExecuteNonQuery();
+        try
+        {
+            foreach (var card in cards)
+            {
+                SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
+                {            
+                    { "@GameID", card.GameID },
+                    { "@Word", card.Word },
+                    { "@Team", card.Team },
+                    { "@IsRevealed", card.IsRevealed }
+                });
+
+                cmd.ExecuteNonQuery();
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);  // <--- הוספה כאן
+            return false;
+        }
+        finally
+        {
+            con.Close();
         }
 
-        return true;
     }
-    catch (Exception ex)
+    public bool RevealCard(int cardId)
     {
-        Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);  // <--- הוספה כאן
-        return false;
-    }
-    finally
-    {
+        SqlConnection con = connect("myProjDB");
+
+        SqlCommand cmd = new SqlCommand("UPDATE Cards SET IsRevealed = 1 WHERE CardID = @CardID", con);
+        cmd.Parameters.AddWithValue("@CardID", cardId);
+
+        int affected = cmd.ExecuteNonQuery();
         con.Close();
+
+        return affected > 0;
     }
-}
 
         public bool JoinGame(PlayerInGame player)
         {
@@ -123,6 +136,7 @@ public bool InsertCards(List<Card> cards)
         {
             { "@GameID", player.GameID },
             { "@UserID", player.UserID },
+            { "@Username", player.Username }, // ✅ הוספת שם משתמש להצטרפות
             { "@Team", player.Team },
             { "@IsSpymaster", player.IsSpymaster }
         };
@@ -151,6 +165,7 @@ public bool InsertCards(List<Card> cards)
     {
         { "@GameID", player.GameID },
         { "@UserID", player.UserID },
+        { "@Username", player.Username }, // ✅ הוספת שם משתמש לעדכון
         { "@Team", player.Team },
         { "@IsSpymaster", player.IsSpymaster }
     };

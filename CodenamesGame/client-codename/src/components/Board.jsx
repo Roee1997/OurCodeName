@@ -1,39 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card from "./Card";
-import ScoreBoard from "./ScoreBoard";
 
-const initialCards = [
-  { word: "חיים", team: "red" },
-  { word: "שלום", team: "red" },
-  { word: "עץ", team: "neutral" },
-  { word: "פיגוע", team: "black" },
-  { word: "חדר", team: "red" },
-  { word: "כיסא", team: "blue" },
-  { word: "שמש", team: "blue" },
-  { word: "תפוח", team: "neutral" },
-  // ... שאר הקלפים
-];
+const Board = ({ gameId, user }) => {
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const Board = () => {
-  const [revealedCards, setRevealedCards] = useState(Array(initialCards.length).fill(false));
-
-  const revealCard = (index) => {
-    setRevealedCards((prev) => prev.map((val, i) => (i === index ? true : val)));
+  const fetchBoard = async () => {
+    try {
+      const res = await fetch(`http://localhost:5150/api/games/${gameId}/board/${user.uid}`);
+      const data = await res.json();
+      console.log("📦 קלפים מהשרת:", data);
+      setCards(data);
+    } catch (error) {
+      console.error("❌ שגיאה בטעינת הלוח:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const score = {
-    red: revealedCards.filter((_, i) => initialCards[i].team === "red" && revealedCards[i]).length,
-    blue: revealedCards.filter((_, i) => initialCards[i].team === "blue" && revealedCards[i]).length,
-  };
+  useEffect(() => {
+    if (gameId && user) {
+      fetchBoard();
+    }
+  }, [gameId, user]);
+
+  if (loading) return <p className="text-center">⏳ טוען לוח...</p>;
+  if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;
 
   return (
-    <div className="flex flex-col items-center">
-      <ScoreBoard score={score} />
-      <div className="grid grid-cols-4 gap-4 mt-4">
-        {initialCards.map((card, index) => (
-          <Card key={index} word={card.word} team={card.team} revealed={revealedCards[index]} onReveal={() => revealCard(index)} />
-        ))}
-      </div>
+    <div className="grid grid-cols-4 gap-4 mt-4">
+      {cards.map((card) => (
+        <Card
+          key={card.cardID}
+          card={card}
+          gameId={gameId}
+          canClick={true} // לשם בדיקה, נאפשר קליקים תמיד
+          onCardRevealed={fetchBoard}
+        />
+      ))}
     </div>
   );
 };

@@ -34,7 +34,7 @@ const Board = ({ gameId, user }) => {
           key={card.cardID}
           card={card}
           gameId={gameId}
-          canClick={true} // לשם בדיקה, נאפשר קליקים תמיד
+          canClick={!card.isRevealed} // ניתן ללחוץ רק על קלפים שלא נחשפו
           onCardRevealed={fetchBoard}
         />
       ))}

@@ -4,7 +4,7 @@ namespace server_codenames.BL
 {
     public class Card
     {
-        public int CardID { get; set; }             // ← זה יווצר אוטומטית ב־SQL
+        public int CardID { get; set; }
         public int GameID { get; set; }
         public string Word { get; set; }
         public string Team { get; set; }
@@ -12,8 +12,9 @@ namespace server_codenames.BL
 
         public Card() { }
 
-        public Card(int gameId, string word, string team)
+        public Card(int cardId, int gameId, string word, string team)
         {
+            CardID = cardId;
             GameID = gameId;
             Word = word;
             Team = team;
@@ -40,11 +41,11 @@ namespace server_codenames.BL
                 {
                     < 8 => "Red",
                     < 16 => "Blue",
-                    24 => "Assassin",
+                    24 => "Black",
                     _ => "Neutral"
                 };
 
-                cards.Add(new Card(gameId, shuffled[i], team));
+                cards.Add(new Card(i + 1, gameId, shuffled[i], team));
             }
 
             return cards;
@@ -55,12 +56,24 @@ namespace server_codenames.BL
             DBservices dbs = new DBservices();
             return dbs.InsertCards(board);
         }
-        
+
+        public static List<Card> GetCardsForGame(int gameId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetCardsForGame(gameId);
+        }
+
+        public static List<Card> GetBoardForPlayer(int gameId, string userId)
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetBoardForPlayer(gameId, userId);
+        }
+
+
         public static bool RevealCard(int cardId)
         {
             DBservices dbs = new DBservices();
             return dbs.RevealCard(cardId);
         }
-
     }
 }

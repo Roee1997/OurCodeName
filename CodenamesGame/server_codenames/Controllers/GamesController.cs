@@ -1,22 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server_codenames.BL;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace server_codenames.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class GamesController : ControllerBase
     {
-        // GET: api/<GamesController>
         [HttpGet]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
-        // GET api/games/{gameId}/is-joinable
         [HttpGet("{gameId}/is-joinable")]
         public IActionResult IsGameJoinable(int gameId)
         {
@@ -33,14 +29,12 @@ namespace server_codenames.Controllers
             }
         }
 
-
-        // POST api/<GamesController>
         [HttpPost]
         public IActionResult CreateGame([FromBody] Game game)
         {
             try
             {
-                int gameId = game.CreateGame(); // BL קורא ל־DAL
+                int gameId = game.CreateGame();
                 return Ok(new { GameID = gameId });
             }
             catch (Exception ex)
@@ -50,48 +44,76 @@ namespace server_codenames.Controllers
         }
 
         [HttpPost("{gameId}/start")]
-    public IActionResult StartGame(int gameId)
-    {
-        try
+        public IActionResult StartGame(int gameId)
         {
-            var board = Card.GenerateBoard(gameId);
-            bool success = Card.SaveBoardToDb(board);
+            try
+            {
+                var board = Card.GenerateBoard(gameId);
+                bool success = Card.SaveBoardToDb(board);
 
-            if (!success)
-                return BadRequest(new { message = "שגיאה בשמירת לוח המשחק" });
+                if (!success)
+                    return BadRequest(new { message = "שגיאה בשמירת לוח המשחק" });
 
-            return Ok(new { message = "לוח נוצר בהצלחה", board });
+                return Ok(new { message = "לוח נוצר בהצלחה", board });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
-        catch (Exception ex)
+
+        [HttpPut("{gameId}/reveal/{cardId}")]
+        public IActionResult RevealCard(int gameId, int cardId)
         {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
+            try
+            {
+                bool success = Card.RevealCard(cardId);
+                if (!success)
+                    return BadRequest(new { message = "הקלף לא נחשף" });
 
-    [HttpPut("{gameId}/reveal/{cardId}")]
-    public IActionResult RevealCard(int gameId, int cardId)
-    {
-        try
+                return Ok(new { message = "הקלף נחשף בהצלחה" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+
+        [HttpGet("{gameId}/board/{userId}")]
+        public IActionResult GetBoardForPlayer(int gameId, string userId)
         {
-            bool success = Card.RevealCard(cardId);
-            if (!success)
-                return BadRequest(new { message = "הקלף לא נחשף" });
-
-            return Ok(new { message = "הקלף נחשף בהצלחה" });
+            try
+            {
+                var cards = Card.GetBoardForPlayer(gameId, userId);
+                return Ok(cards);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
-        catch (Exception ex)
+
+
+        [HttpGet("{gameId}/cards")]
+        public IActionResult GetCardsForGame(int gameId)
         {
-            return BadRequest(new { error = ex.Message });
+            try
+            {
+                List<Card> cards = Card.GetCardsForGame(gameId);
+                return Ok(cards);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
-    }
 
-        // PUT api/<GamesController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public void Put(int id, [FromBody] string value)
         {
         }
 
-        // DELETE api/<GamesController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

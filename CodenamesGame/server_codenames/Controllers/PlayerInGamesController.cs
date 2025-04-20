@@ -40,16 +40,16 @@ public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
 {
     try
     {
-        player.GameID = gameId; // ליתר ביטחון, תעדכן מ־URL
-
+        player.GameID = gameId;
         bool success = player.JoinGame();
-        return success ? Ok() : BadRequest("ההצטרפות נכשלה");
+        return success ? Ok(new { message = "הצטרפות הצליחה" }) : Ok(new { message = "השחקן כבר במשחק" });
     }
     catch (Exception ex)
     {
         return BadRequest(new { error = ex.Message });
     }
 }
+
     [HttpGet("{gameId}/is-ready")]
 public IActionResult IsGameReady(int gameId)
 {

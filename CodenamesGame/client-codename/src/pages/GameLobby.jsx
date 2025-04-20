@@ -18,23 +18,46 @@ const GameLobby = () => {
 
   // ✅ שלב חדש: הצטרפות למשחק אם צריך ואז עדכון
   const joinGameIfNeeded = async (team, isSpymaster = false) => {
-    const alreadyInGame = players.some(p => p.userID === user.uid);
+    try {
+      const playerExists = players.some(p => p.userID === user.uid);
+      if (!playerExists) {
+        const joinRes = await fetch(`http://localhost:5150/api/playeringames/${gameId}/join`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            gameID: parseInt(gameId),
+            userID: user.uid,
+            username: user.displayName || "ללא שם",
+            team,
+            isSpymaster
+          })
+        });
 
-    if (!alreadyInGame) {
-      await fetch(`http://localhost:5150/api/playeringames/${gameId}/join`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          gameID: parseInt(gameId),
-          userID: user.uid,
-          username: user.displayName || "ללא שם",
-          team,
-          isSpymaster
-        })
-      });
+        if (!joinRes.ok) {
+          let errorMsg = "שגיאה בהצטרפות למשחק";
+          try {
+            const contentType = joinRes.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              const err = await joinRes.json();
+              errorMsg = err.error || errorMsg;
+            } else {
+              const text = await joinRes.text();
+              errorMsg = `שגיאה מהשרת: ${text}`;
+            }
+          } catch (e) {
+            errorMsg = "שגיאה לא צפויה בהצטרפות";
+          }
+
+          console.error(errorMsg);
+          return;
+        }
+      }
+
+      // תמיד נבצע עדכון סטטוס של הקבוצה / לוחש
+      await updatePlayer(team, isSpymaster);
+    } catch (error) {
+      console.error("שגיאה ב־joinGameIfNeeded:", error);
     }
-
-    await updatePlayer(team, isSpymaster);
   };
 
   const updatePlayer = async (team, isSpymaster) => {
@@ -51,7 +74,6 @@ const GameLobby = () => {
         })
       });
 
-      // שמירה ב-Firebase
       await savePlayerToLobby(gameId, {
         userID: user.uid,
         username: user.displayName || "ללא שם",
@@ -111,7 +133,6 @@ const GameLobby = () => {
     <div className="p-6 max-w-4xl mx-auto text-center">
       <h1 className="text-3xl font-bold mb-4">חדר משחק #{gameId}</h1>
 
-      {/* כפתורי הצטרפות */}
       <div className="flex justify-center gap-4 mb-6">
         <button
           onClick={() => joinGameIfNeeded("Red", false)}
@@ -127,7 +148,6 @@ const GameLobby = () => {
         </button>
       </div>
 
-      {/* הצגת הקבוצות */}
       <div className="flex justify-around gap-8">
         {["Red", "Blue"].map((teamColor) => {
           const teamPlayers = players.filter(p => p.team === teamColor);
@@ -173,7 +193,6 @@ const GameLobby = () => {
         })}
       </div>
 
-      {/* כפתור התחלת משחק */}
       <div className="mt-8">
         <button
           onClick={startGame}

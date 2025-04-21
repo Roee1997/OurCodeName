@@ -21,31 +21,46 @@ namespace server_codenames.BL
             IsRevealed = false;
         }
 
+        // מחזיר רשימת 25 קלפים אקראיים עם חלוקה לצוותים (אדום, כחול, ניטרלי ומתנקש)
         public static List<Card> GenerateBoard(int gameId)
         {
             List<string> allWords = new List<string>
-            {
-                "מחשב", "שמש", "חול", "אוזן", "עכבר", "רימון", "מגדל", "שוקו",
-                "אבן", "דג", "עין", "סוס", "תפוח", "שולחן", "מכונית", "טלוויזיה",
-                "כובע", "גשר", "רובה", "קיץ", "חורף", "נחל", "בית", "אור", "צל"
-            };
+    {
+        "מחשב", "שמש", "חול", "אוזן", "עכבר", "רימון", "מגדל", "שוקו",
+        "אבן", "דג", "עין", "סוס", "תפוח", "שולחן", "מכונית", "טלוויזיה",
+        "כובע", "גשר", "רובה", "קיץ", "חורף", "נחל", "בית", "אור", "צל"
+    };
+
+            if (allWords.Count < 25)
+                throw new Exception("❌ אין מספיק מילים ליצירת לוח");
 
             var random = new Random();
-            var shuffled = allWords.OrderBy(w => random.Next()).Take(25).ToList();
+            var shuffledWords = allWords.OrderBy(w => random.Next()).Take(25).ToList();
 
-            var cards = new List<Card>();
+            List<string> roles = new List<string>
+    {
+        "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red",
+        "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue",
+        "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral",
+        "Assassin"
+    };
+
+            if (roles.Count != 25)
+                throw new Exception("❌ מספר התפקידים (Roles) שגוי – חייבים 25");
+
+            var shuffledRoles = roles.OrderBy(r => random.Next()).ToList();
+
+            List<Card> cards = new List<Card>();
 
             for (int i = 0; i < 25; i++)
             {
-                string team = i switch
+                cards.Add(new Card
                 {
-                    < 8 => "Red",
-                    < 16 => "Blue",
-                    24 => "Black",
-                    _ => "Neutral"
-                };
-
-                cards.Add(new Card(i + 1, gameId, shuffled[i], team));
+                    GameID = gameId,
+                    Word = shuffledWords[i],
+                    Team = shuffledRoles[i],
+                    IsRevealed = false
+                });
             }
 
             return cards;

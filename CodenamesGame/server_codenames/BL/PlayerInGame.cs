@@ -6,36 +6,37 @@ namespace server_codenames.BL
     {
         public int GameID { get; set; }
         public string UserID { get; set; }
-    
+        public string Username { get; set; } // ✅ חדש: שם משתמש לתצוגה בלובי
         public string Team { get; set; }
         public bool IsSpymaster { get; set; }
 
         public PlayerInGame() { }
 
-        public PlayerInGame(int gameID, string userID,  string team, bool isSpymaster)
+        public PlayerInGame(int gameID, string userID, string username, string team, bool isSpymaster)
         {
             GameID = gameID;
             UserID = userID;
-            
+            Username = username;
             Team = team;
             IsSpymaster = isSpymaster;
         }
 
         public bool UpdatePlayer()
-{
-    DBservices dbs = new DBservices();
-    return dbs.UpdatePlayer(this);
-}
+        {
+            DBservices dbs = new DBservices();
+            return dbs.UpdatePlayer(this);
+        }
 
         public bool JoinGame()
         {
             DBservices dbs = new DBservices();
             return dbs.JoinGame(this);
         }
+
         public static List<PlayerInGame> GetPlayersInGame(int gameId)
-{
-    DBservices dbs = new DBservices();
-    return dbs.GetPlayersInGame(gameId);
-}
+        {
+            DBservices dbs = new DBservices();
+            return dbs.GetPlayersInGame(gameId);
+        }
     }
 }

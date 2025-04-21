@@ -1,14 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './context/AuthContext'; // חשוב לוודא שה-AuthProvider מיובא כראוי
-import Home from "./pages/Home";
-import Game from "./pages/Game";
-import LobbyPage from "./pages/Lobby";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
-import ProtectedRoute from "./components/ProtectedRoute"; // הקומפוננטה ששומרת על עמודים מוגנים
+import { Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from './context/AuthContext';
 import './css/App.css';
 import Friends from "./pages/Friends";
-import GameLobby from "./pages/GameLobby.jsx"; // ⬅️ הוסף את זה למעלה
+import Game from "./pages/Game";
+import GameLobby from "./pages/GameLobby.jsx";
+import Home from "./pages/Home";
+import LobbyPage from "./pages/Lobby";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 function App() {
   return (
@@ -20,10 +20,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/lobby" element={<LobbyPage />} />
-            <Route path="/game" element={<Game />} />
-            <Route path="/game-lobby/:gameId" element={<GameLobby />} /> {/* ✅ חדש */}
+            <Route path="/game/:gameId" element={<Game />} /> {/* ✅ תיקון כאן */}
+            <Route path="/game-lobby/:gameId" element={<GameLobby />} />
             <Route path="/friends" element={<Friends />} />
           </Route>
+
           <Route path="*" element={<Home />} />
         </Routes>
       </div>

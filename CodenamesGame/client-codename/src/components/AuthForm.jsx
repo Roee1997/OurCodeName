@@ -1,5 +1,5 @@
 import React from 'react';
-
+///בדיקה בדיקה /// 
 const AuthForm = ({ onSubmit, buttonText, email, setEmail, password, setPassword }) => {
   const handleSubmit = (e) => {
     e.preventDefault();  // מונע רענון אוטומטי של הדף בעת שליחת הטופס

@@ -34,33 +34,98 @@ namespace Server_codenames.DAL
         //--------------------------------------------------------------------------------------------------
         // PLAYER IN GAME
         //--------------------------------------------------------------------------------------------------
-        public List<PlayerInGame> GetPlayersInGame(int gameId)
+    public List<PlayerInGame> GetPlayersInGame(int gameId)
+    {
+        List<PlayerInGame> players = new List<PlayerInGame>();
+        SqlConnection con = null;
+
+        try
         {
-            List<PlayerInGame> players = new List<PlayerInGame>();
+            con = connect("myProjDB");
+
+            SqlCommand cmd = new SqlCommand("sp_GetPlayersInGame", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@GameID", gameId);
+
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                PlayerInGame player = new PlayerInGame
+                {
+                    GameID = gameId, 
+                    UserID = reader["UserID"].ToString(),
+                    Team = reader["Team"].ToString(),
+                    IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"]),
+                    Username = reader["Username"].ToString() // ✅ נוספה שליפת שם משתמש
+                };
+                players.Add(player);
+            }
+
+            return players;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+                con.Close();
+        }
+    }   
+                // ✅ בדיקה אם משתמש הוא לוחש
+        public bool IsUserSpymaster(int gameId, string userId)
+        {
+            SqlConnection con = null;
+            try
+            {
+                con = connect("myProjDB");
+                SqlCommand cmd = new SqlCommand("SELECT IsSpymaster FROM PlayersInGame WHERE GameID = @GameID AND UserID = @UserID", con);
+                cmd.Parameters.AddWithValue("@GameID", gameId);
+                cmd.Parameters.AddWithValue("@UserID", userId);
+                object result = cmd.ExecuteScalar();
+                return result != null && Convert.ToBoolean(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }    
+            // ✅ Get Board For Player (Spymaster sees teams, Agent only revealed)
+            public List<Card> GetBoardForPlayer(int gameId, string userId)
+        {
+            List<Card> cards = new List<Card>();
             SqlConnection con = null;
 
             try
             {
                 con = connect("myProjDB");
 
-                SqlCommand cmd = new SqlCommand("sp_GetPlayersInGame", con);
+                SqlCommand cmd = new SqlCommand("sp_GetBoardForPlayer", con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@GameID", gameId);
+                cmd.Parameters.AddWithValue("@UserID", userId);
 
                 SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    PlayerInGame player = new PlayerInGame
+                    Card card = new Card
                     {
-                        UserID = reader["UserID"].ToString(),
-
-                        Team = reader["Team"].ToString(),
-                        IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"])
+                        CardID = Convert.ToInt32(reader["CardID"]),
+                        GameID = Convert.ToInt32(reader["GameID"]),
+                        Word = reader["Word"].ToString(),
+                        IsRevealed = Convert.ToBoolean(reader["IsRevealed"]),
+                        Team = reader["Team"] == DBNull.Value ? null : reader["Team"].ToString()
                     };
-                    players.Add(player);
+                    cards.Add(card);
                 }
 
-                return players;
+                return cards;
             }
             catch (Exception ex)
             {
@@ -72,6 +137,95 @@ namespace Server_codenames.DAL
                     con.Close();
             }
         }
+
+        public bool InsertCards(List<Card> cards)
+        {
+            SqlConnection con = connect("myProjDB");
+
+            try
+            {
+                foreach (var card in cards)
+                {
+                    if (string.IsNullOrEmpty(card.Team))
+                        throw new Exception("Team לא מוגדר באחד הקלפים");
+
+                    SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
+            {
+                { "@GameID", card.GameID },
+                { "@Word", card.Word },
+                { "@Team", card.Team },
+                { "@IsRevealed", card.IsRevealed }
+            });
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);
+                return false;
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+        public List<Card> GetCardsForGame(int gameId)
+{
+    List<Card> cards = new List<Card>();
+    SqlConnection con = null;
+
+    try
+    {
+        con = connect("myProjDB");
+
+        SqlCommand cmd = new SqlCommand("sp_GetCardsForGame", con);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("@GameID", gameId);
+
+        SqlDataReader reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            Card card = new Card
+            {
+                CardID = Convert.ToInt32(reader["CardID"]),
+                GameID = Convert.ToInt32(reader["GameID"]),
+                Word = reader["Word"].ToString(),
+                Team = reader["Team"].ToString(),
+                IsRevealed = Convert.ToBoolean(reader["IsRevealed"])
+            };
+
+            cards.Add(card);
+        }
+
+        return cards;
+    }
+    catch (Exception ex)
+    {
+        throw ex;
+    }
+    finally
+    {
+        if (con != null)
+            con.Close();
+    }
+}
+
+    public bool RevealCard(int cardId)
+    {
+        SqlConnection con = connect("myProjDB");
+
+        SqlCommand cmd = new SqlCommand("UPDATE Cards SET IsRevealed = 1 WHERE CardID = @CardID", con);
+        cmd.Parameters.AddWithValue("@CardID", cardId);
+
+        int affected = cmd.ExecuteNonQuery();
+        con.Close();
+
+        return affected > 0;
+    }
+
         public bool JoinGame(PlayerInGame player)
         {
             SqlConnection con;
@@ -92,6 +246,7 @@ namespace Server_codenames.DAL
         {
             { "@GameID", player.GameID },
             { "@UserID", player.UserID },
+            { "@Username", player.Username }, // ✅ הוספת שם משתמש להצטרפות
             { "@Team", player.Team },
             { "@IsSpymaster", player.IsSpymaster }
         };
@@ -120,6 +275,7 @@ namespace Server_codenames.DAL
     {
         { "@GameID", player.GameID },
         { "@UserID", player.UserID },
+        { "@Username", player.Username }, // ✅ הוספת שם משתמש לעדכון
         { "@Team", player.Team },
         { "@IsSpymaster", player.IsSpymaster }
     };

@@ -60,6 +60,27 @@ const FriendsPendingRequests = () => {
     }
   };
 
+  const handleAcceptRequest = async (senderID, receiverID) => {
+    try {
+      const res = await fetch("http://localhost:5150/api/friends/accept", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ senderID, receiverID })
+      });
+  
+      const data = await res.json();
+      console.log("✅ Accept response:", data);
+  
+      fetchPendingRequests();
+      fetchReceivedRequests();
+    } catch (error) {
+      console.error("❌ Error accepting friend request:", error);
+    }
+  };
+  
+
   return (
     <div className="mb-8">
       {error && <p className="text-red-500">{error}</p>}
@@ -89,7 +110,7 @@ const FriendsPendingRequests = () => {
               ))}
             </ul>
           )}
-
+  
           {/* 🔹 Received Requests */}
           <h2 className="text-xl font-semibold mb-2">Received Friend Requests</h2>
           {receivedRequests.length === 0 ? (
@@ -103,6 +124,12 @@ const FriendsPendingRequests = () => {
                 >
                   <span>{user.username}</span>
                   <div className="space-x-2">
+                    <button
+                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                      onClick={() => handleAcceptRequest(user.userID, userId)}
+                    >
+                      Accept
+                    </button>
                     <button
                       className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       onClick={() => updateRequestStatus(user.userID, userId, "decline")}
@@ -118,6 +145,7 @@ const FriendsPendingRequests = () => {
       )}
     </div>
   );
+  
 };
 
 export default FriendsPendingRequests;

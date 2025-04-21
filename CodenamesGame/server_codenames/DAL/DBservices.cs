@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Data;
 using server_codenames.Controllers;
+using System.Diagnostics;
 
 namespace Server_codenames.DAL
 {
@@ -34,43 +35,43 @@ namespace Server_codenames.DAL
         // PLAYER IN GAME
         //--------------------------------------------------------------------------------------------------
         public List<PlayerInGame> GetPlayersInGame(int gameId)
-{
-    List<PlayerInGame> players = new List<PlayerInGame>();
-    SqlConnection con = null;
-
-    try
-    {
-        con = connect("myProjDB");
-
-        SqlCommand cmd = new SqlCommand("sp_GetPlayersInGame", con);
-        cmd.CommandType = CommandType.StoredProcedure;
-        cmd.Parameters.AddWithValue("@GameID", gameId);
-
-        SqlDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
         {
-            PlayerInGame player = new PlayerInGame
-            {
-                UserID = reader["UserID"].ToString(),
-                
-                Team = reader["Team"].ToString(),
-                IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"])
-            };
-            players.Add(player);
-        }
+            List<PlayerInGame> players = new List<PlayerInGame>();
+            SqlConnection con = null;
 
-        return players;
-    }
-    catch (Exception ex)
-    {
-        throw ex;
-    }
-    finally
-    {
-        if (con != null)
-            con.Close();
-    }
-}
+            try
+            {
+                con = connect("myProjDB");
+
+                SqlCommand cmd = new SqlCommand("sp_GetPlayersInGame", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@GameID", gameId);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    PlayerInGame player = new PlayerInGame
+                    {
+                        UserID = reader["UserID"].ToString(),
+
+                        Team = reader["Team"].ToString(),
+                        IsSpymaster = Convert.ToBoolean(reader["IsSpymaster"])
+                    };
+                    players.Add(player);
+                }
+
+                return players;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
         public bool JoinGame(PlayerInGame player)
         {
             SqlConnection con;
@@ -112,10 +113,10 @@ namespace Server_codenames.DAL
 
 
         public bool UpdatePlayer(PlayerInGame player)
-{
-    SqlConnection con = connect("myProjDB");
+        {
+            SqlConnection con = connect("myProjDB");
 
-    Dictionary<string, object> paramDic = new Dictionary<string, object>
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
     {
         { "@GameID", player.GameID },
         { "@UserID", player.UserID },
@@ -123,38 +124,38 @@ namespace Server_codenames.DAL
         { "@IsSpymaster", player.IsSpymaster }
     };
 
-    SqlCommand cmd = CreateCommandWithStoredProcedure("sp_UpdatePlayer", con, paramDic);
-    int affected = cmd.ExecuteNonQuery();
-    con.Close();
+            SqlCommand cmd = CreateCommandWithStoredProcedure("sp_UpdatePlayer", con, paramDic);
+            int affected = cmd.ExecuteNonQuery();
+            con.Close();
 
-    return affected > 0;
-}
+            return affected > 0;
+        }
         //--------------------------------------------------------------------------------------------------
         // GAME
         //--------------------------------------------------------------------------------------------------
-        
-        
-        public bool IsGameJoinable(int gameId)
-{
-    SqlConnection con = connect("myProjDB");
 
-    Dictionary<string, object> paramDic = new Dictionary<string, object>
+
+        public bool IsGameJoinable(int gameId)
+        {
+            SqlConnection con = connect("myProjDB");
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>
     {
         { "@GameID", gameId }
     };
 
-    SqlCommand cmd = CreateCommandWithStoredProcedure("sp_IsGameJoinable", con, paramDic);
-    SqlDataReader reader = cmd.ExecuteReader();
+            SqlCommand cmd = CreateCommandWithStoredProcedure("sp_IsGameJoinable", con, paramDic);
+            SqlDataReader reader = cmd.ExecuteReader();
 
-    if (reader.Read())
-    {
-        return Convert.ToBoolean(reader["Joinable"]);
-    }
+            if (reader.Read())
+            {
+                return Convert.ToBoolean(reader["Joinable"]);
+            }
 
-    return false;
-}
-        
-        
+            return false;
+        }
+
+
         public int CreateGame(Game game)
         {
             SqlConnection con;
@@ -273,6 +274,9 @@ namespace Server_codenames.DAL
             }
         }
 
+        //--------------------------------------------------------------------------------------------------
+        // FRIENDS
+        //--------------------------------------------------------------------------------------------------
         //find user to add to friend list
         public server_codenames.BL.Users GetUserByUsernameOrID_DB(string query)
         {
@@ -321,9 +325,6 @@ namespace Server_codenames.DAL
                     con.Close();
             }
         }
-
-
-
 
         //create a pending friend request
         public string SendFriendRequestDB(string senderId, string receiverQuery)
@@ -429,7 +430,6 @@ namespace Server_codenames.DAL
             }
         }
 
-
         public List<server_codenames.BL.Users> GetPendingFriendRequestsReceived_DB(string receiverId)
         {
             SqlConnection con;
@@ -487,11 +487,11 @@ namespace Server_codenames.DAL
             catch (Exception ex) { throw new Exception("DB connection failed", ex); }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>
-    {
-        { "@SenderID", senderId },
-        { "@ReceiverID", receiverId },
-        { "@Action", action }
-    };
+            {
+                { "@SenderID", senderId },
+                { "@ReceiverID", receiverId },
+                { "@Action", action }
+            };
 
             cmd = CreateCommandWithStoredProcedure("CancelFriendRequest", con, paramDic);
 
@@ -510,6 +510,142 @@ namespace Server_codenames.DAL
             }
             finally { if (con != null) con.Close(); }
         }
+
+        public string AcceptFriendRequestAndInsertFriendship(string senderID, string receiverID)
+        {
+            Debug.WriteLine("==> DB Start: AcceptFriendRequestAndInsertFriendship");
+            Debug.WriteLine("SenderID: " + senderID);
+            Debug.WriteLine("ReceiverID: " + receiverID);
+
+            SqlConnection con = connect("myProjDB"); // already opened here
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@SenderID", senderID);
+            paramDic.Add("@ReceiverID", receiverID);
+
+            SqlCommand cmd = CreateCommandWithStoredProcedure("AcceptFriendRequestAndInsertFriendship", con, paramDic);
+
+            try
+            {
+                string result = "Error";
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        result = reader["Result"].ToString();
+                        Debug.WriteLine("==> DB RESULT: " + result);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("==> DB RESULT: NO ROWS RETURNED");
+                    }
+                }
+
+                Debug.WriteLine("==> DB FINAL RESULT TO RETURN: " + result);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("==> DB ERROR: " + ex.Message);
+                return "Error";
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
+        // Gets list of friends for a given user UID
+        public List<Dictionary<string, object>> GetFriendsByUserID(string userId)
+        {
+            Debug.WriteLine("==> DB Start: GetFriendsByUserID for userId = " + userId);
+
+            SqlConnection con = connect("myProjDB");
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserID", userId);
+
+            SqlCommand cmd = CreateCommandWithStoredProcedure("GetFriendsByUserID", con, paramDic);
+
+            try
+            {
+                List<Dictionary<string, object>> results = new List<Dictionary<string, object>>();
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        row["UserID"] = reader["UserID"].ToString();
+                        row["Username"] = reader["Username"].ToString();
+                        row["Email"] = reader["Email"].ToString();
+                        row["FriendshipDate"] = Convert.ToDateTime(reader["FriendshipDate"]).ToString("yyyy-MM-dd");
+
+                        results.Add(row);
+                    }
+                }
+
+                Debug.WriteLine("==> DB GetFriendsByUserID: Found " + results.Count + " friends.");
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("==> DB ERROR GetFriendsByUserID: " + ex.Message);
+                return new List<Dictionary<string, object>>();
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
+        // Removes a friend and updates last FriendRequest to 'Unfriended'
+        public string RemoveFriendshipAndUpdateStatus(string userId, string friendId)
+        {
+            Debug.WriteLine("==> DB Start: RemoveFriendshipAndUpdateStatus");
+            Debug.WriteLine("UserID: " + userId);
+            Debug.WriteLine("FriendID: " + friendId);
+
+            SqlConnection con = connect("myProjDB");
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserID", userId);
+            paramDic.Add("@FriendID", friendId);
+
+            SqlCommand cmd = CreateCommandWithStoredProcedure("RemoveFriendshipAndUpdateStatus", con, paramDic);
+
+            try
+            {
+                string result = "Error";
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        result = reader["Result"].ToString();
+                        Debug.WriteLine("==> DB RESULT: " + result);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("==> DB RESULT: NO ROWS RETURNED");
+                    }
+                }
+
+                Debug.WriteLine("==> DB FINAL RESULT TO RETURN: " + result);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("==> DB ERROR: " + ex.Message);
+                return "Error";
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
+
+
 
 
         //---------------------------------------------------------------------------------

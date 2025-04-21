@@ -1,4 +1,5 @@
 ﻿using Server_codenames.DAL;
+using System.Diagnostics;
 
 namespace server_codenames.BL
 {
@@ -36,6 +37,34 @@ namespace server_codenames.BL
         {
             DBservices dbs = new DBservices();
             return dbs.CancelFriendRequestDB(senderId, receiverId, action);
+        }
+
+        // Delegates friend request acceptance and friendship insertion to DBservices layer.
+        public static string AcceptFriendRequestAndInsertFriendship(string senderID, string receiverID)
+        {
+            Debug.WriteLine("==> BL: AcceptFriendRequestAndInsertFriendship");
+            DBservices dbs = new DBservices();
+            string result = dbs.AcceptFriendRequestAndInsertFriendship(senderID, receiverID);
+            Debug.WriteLine("==> BL Result: " + result);
+            return result;
+        }
+
+        // Gets friends list by user UID from DB
+        public static List<Dictionary<string, object>> GetFriends(string userId)
+        {
+            Debug.WriteLine("==> BL: GetFriends for userId = " + userId);
+            DBservices dbs = new DBservices();
+            return dbs.GetFriendsByUserID(userId);
+        }
+
+        // Removes a friend and updates the friend request status to 'Unfriended'
+        public static string RemoveFriend(string userId, string friendId)
+        {
+            Debug.WriteLine("==> BL: RemoveFriend");
+            DBservices dbs = new DBservices();
+            string result = dbs.RemoveFriendshipAndUpdateStatus(userId, friendId);
+            Debug.WriteLine("==> BL Result: " + result);
+            return result;
         }
 
     }

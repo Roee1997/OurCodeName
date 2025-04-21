@@ -1,6 +1,7 @@
 import React from "react";
 import FriendSearch from "../components/FriendSearch";
 import FriendsPendingRequests from "../components/FriendsPendingRequests"; // ⬅️ ייבוא הקומפוננטה החדשה
+import FriendsList from "../components/FriendsList";
 
 const Friends = () => {
   return (
@@ -13,6 +14,10 @@ const Friends = () => {
 
       <section className="mb-8">
         <FriendsPendingRequests />
+      </section>
+
+      <section className="mb-8">
+        <FriendsList />
       </section>
 
       {/* בהמשך נוסיף כאן את FriendsList ו-CreateGameInvite */}

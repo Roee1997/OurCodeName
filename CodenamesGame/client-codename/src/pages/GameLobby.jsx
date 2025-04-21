@@ -1,7 +1,5 @@
-import { onValue, ref, set } from "firebase/database"; // נוודא שהשירות הזה קיים
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { db } from "../../firebaseConfig"; // נוודא שהשירות הזה קיים
 import { useAuth } from "../context/AuthContext";
 import { savePlayerToLobby, subscribeToLobbyPlayers } from "../services/firebaseService";
 
@@ -14,23 +12,9 @@ const GameLobby = () => {
 
   // האזנה ל־Firebase בזמן אמת
   useEffect(() => {
-    const unsubscribePlayers = subscribeToLobbyPlayers(gameId, setPlayers);
-  
-    const statusRef = ref(db, `lobbies/${gameId}/status`);
-    const unsubscribeStatus = onValue(statusRef, (snapshot) => {
-      const status = snapshot.val();
-      if (status === "started") {
-        navigate(`/game/${gameId}`);
-        return; // אם המשחק התחיל, נוודא שלא נבצע עדכון נוסף
-      }
-    });
-  
-    return () => {
-      unsubscribePlayers();
-      unsubscribeStatus(); // נקה את שתי ההאזנות
-    };
+    const unsubscribe = subscribeToLobbyPlayers(gameId, setPlayers);
+    return () => unsubscribe();
   }, [gameId]);
-  
 
   // ✅ שלב חדש: הצטרפות למשחק אם צריך ואז עדכון
   const joinGameIfNeeded = async (team, isSpymaster = false) => {
@@ -134,30 +118,14 @@ const GameLobby = () => {
       alert("המשחק עדיין לא מוכן – חייב לוחש וסוכן בכל קבוצה");
       return;
     }
-  
-    try {
-      const res = await fetch(`http://localhost:5150/api/games/${gameId}/start`, {
-        method: "POST"
-      });
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        alert(data?.message || "שגיאה בהתחלת המשחק");
-        return;
-      }
 
-      // ✅ עדכון ב־Firebase כדי שכולם יעברו למסך המשחק
-      await set(ref(db, `lobbies/${gameId}/status`), "started");
-  
-      // ✅ ניווט מקומי
-      navigate(`/game/${gameId}`);
-    } catch (err) {
-      console.error("שגיאה בהתחלת המשחק", err);
-      alert("שגיאה בהתחלת המשחק");
-    }
+    await fetch(`http://localhost:5150/api/games/${gameId}/start`, {
+      method: "POST"
+    });
+
+    navigate(`/game/${gameId}`);
   };
-  
+
   const redTeam = players.filter(p => p.team === "Red");
   const blueTeam = players.filter(p => p.team === "Blue");
 

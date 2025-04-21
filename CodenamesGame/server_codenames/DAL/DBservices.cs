@@ -138,7 +138,7 @@ namespace Server_codenames.DAL
             }
         }
 
-        public bool InsertCards(List<Card> cards)
+    public bool InsertCards(List<Card> cards)
         {
             SqlConnection con = connect("myProjDB");
 
@@ -146,16 +146,13 @@ namespace Server_codenames.DAL
             {
                 foreach (var card in cards)
                 {
-                    if (string.IsNullOrEmpty(card.Team))
-                        throw new Exception("Team לא מוגדר באחד הקלפים");
-
                     SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
-            {
-                { "@GameID", card.GameID },
-                { "@Word", card.Word },
-                { "@Team", card.Team },
-                { "@IsRevealed", card.IsRevealed }
-            });
+                    {            
+                        { "@GameID", card.GameID },
+                        { "@Word", card.Word },
+                        { "@Team", card.Team },
+                        { "@IsRevealed", card.IsRevealed }
+                    });
 
                     cmd.ExecuteNonQuery();
                 }
@@ -164,15 +161,16 @@ namespace Server_codenames.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);
+                Console.WriteLine("❌ שגיאה בהוספת קלפים: " + ex.Message);  // <--- הוספה כאן
                 return false;
             }
             finally
             {
                 con.Close();
             }
-        }
-        public List<Card> GetCardsForGame(int gameId)
+
+    }
+    public List<Card> GetCardsForGame(int gameId)
 {
     List<Card> cards = new List<Card>();
     SqlConnection con = null;

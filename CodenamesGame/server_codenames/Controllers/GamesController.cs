@@ -29,34 +29,6 @@ namespace server_codenames.Controllers
             }
         }
 
-        [HttpGet("{gameId}/board/{userId}")]
-        public IActionResult GetBoardForPlayer(int gameId, string userId)
-        {
-            try
-            {
-                var cards = Card.GetBoardForPlayer(gameId, userId);
-                return Ok(cards);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-
-        [HttpGet("{gameId}/cards")]
-        public IActionResult GetCardsForGame(int gameId)
-        {
-            try
-            {
-                List<Card> cards = Card.GetCardsForGame(gameId);
-                return Ok(cards);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-
         [HttpPost]
         public IActionResult CreateGame([FromBody] Game game)
         {
@@ -76,15 +48,9 @@ namespace server_codenames.Controllers
         {
             try
             {
-                //  בדיקה אם כבר נוצר לוח למשחק הזה
-                if (Card.GetCardsForGame(gameId).Count > 0)
-                {
-                    return BadRequest(new { message = "לוח כבר נוצר למשחק הזה" });
-                }
-                //  יצירת הלוח
                 var board = Card.GenerateBoard(gameId);
-                //  שמירת הלוח למסד הנתונים
                 bool success = Card.SaveBoardToDb(board);
+
                 if (!success)
                     return BadRequest(new { message = "שגיאה בשמירת לוח המשחק" });
 
@@ -92,7 +58,6 @@ namespace server_codenames.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("❌ שגיאה ביצירת לוח המשחק: " + ex.Message); // ✅ חדש
                 return BadRequest(new { error = ex.Message });
             }
         }
@@ -107,6 +72,36 @@ namespace server_codenames.Controllers
                     return BadRequest(new { message = "הקלף לא נחשף" });
 
                 return Ok(new { message = "הקלף נחשף בהצלחה" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+
+        [HttpGet("{gameId}/board/{userId}")]
+        public IActionResult GetBoardForPlayer(int gameId, string userId)
+        {
+            try
+            {
+                var cards = Card.GetBoardForPlayer(gameId, userId);
+                return Ok(cards);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+
+        [HttpGet("{gameId}/cards")]
+        public IActionResult GetCardsForGame(int gameId)
+        {
+            try
+            {
+                List<Card> cards = Card.GetCardsForGame(gameId);
+                return Ok(cards);
             }
             catch (Exception ex)
             {

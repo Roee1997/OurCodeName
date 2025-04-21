@@ -9,7 +9,7 @@ namespace server_codenames.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class Users : ControllerBase
-    {   
+    {
         // GET: api/<Users>
         [HttpGet("check-username/{username}")]
         public IActionResult CheckUsername(string username)

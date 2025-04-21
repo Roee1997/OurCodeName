@@ -1,9 +1,10 @@
 import { onValue, ref, set } from "firebase/database"; // נוודא שהשירות הזה קיים
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../../firebaseConfig"; // נוודא שהשירות הזה קיים
 import { useAuth } from "../context/AuthContext";
-import { savePlayerToLobby, subscribeToLobbyPlayers } from "../services/firebaseService";
+import { saveBoardToFirebase, savePlayerToLobby, subscribeToLobbyPlayers } from "../services/firebaseService";
 
 const GameLobby = () => {
   const { gameId } = useParams();
@@ -18,6 +19,7 @@ const GameLobby = () => {
   
     const statusRef = ref(db, `lobbies/${gameId}/status`);
     const unsubscribeStatus = onValue(statusRef, (snapshot) => {
+      console.log("✅ onValue is working:", typeof onValue);
       const status = snapshot.val();
       if (status === "started") {
         navigate(`/game/${gameId}`);
@@ -146,6 +148,9 @@ const GameLobby = () => {
         alert(data?.message || "שגיאה בהתחלת המשחק");
         return;
       }
+
+          // ✅ שלב חדש: שמור את הקלפים ל־Realtime Database
+      await saveBoardToFirebase(gameId, data.board);
 
       // ✅ עדכון ב־Firebase כדי שכולם יעברו למסך המשחק
       await set(ref(db, `lobbies/${gameId}/status`), "started");

@@ -1,6 +1,5 @@
 import { onValue, ref, set } from "firebase/database";
 import { db } from "../../firebaseConfig"; // בגלל שהfirebaseConfig.js נמצא בשורש
-
 /**
  * שומר שחקן ב־Realtime Database
  * @param {string} gameId - מזהה המשחק
@@ -48,6 +47,7 @@ export const subscribeToBoard = (gameId, callback) => {
   return onValue(boardRef, (snapshot) => {
     const data = snapshot.val();
     const cards = data ? Object.values(data) : [];
+    console.log("📦 קלפים מ־Firebase:", cards); // ✅ תצוגה בקונסול
     callback(cards);
   });
 };

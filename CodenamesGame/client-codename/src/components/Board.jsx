@@ -28,7 +28,7 @@ const Board = ({ gameId, user }) => {
       });
       return () => unsubscribe();
     }
-  }, [gameId]);
+  }, [gameId]);  
 
   if (loading) return <p className="text-center">⏳ טוען לוח...</p>;
   if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;

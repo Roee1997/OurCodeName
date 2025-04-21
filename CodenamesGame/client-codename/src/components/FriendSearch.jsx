@@ -1,69 +1,37 @@
 import React, { useState } from "react";
-import { searchUser, sendFriendRequest } from "../services/friendsService";
+import FriendAddRequest from "./FriendAddRequest";
 
 const FriendSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSearch = async () => {
     setErrorMessage("");
-    setSuccessMessage("");
     setSearchResult(null);
 
-    if (!searchTerm.trim()) {
-      setErrorMessage("Please enter a username or user ID.");
-      return;
-    }
+    console.log("🔍 Query sent to server:", searchTerm);
+    const endpoint = `http://localhost:5150/api/friends/search?query=${searchTerm.trim()}`;
 
     try {
-      const user = await searchUser(searchTerm.trim());
-      if (user) {
-        setSearchResult(user);
-      } else {
-        setErrorMessage("User not found.");
-      }
-    } catch (error) {
-      console.error("Search error:", error);
-      setErrorMessage("Error occurred while searching.");
-    }
-  };
+      const res = await fetch(endpoint);
+      if (!res.ok) throw new Error("User not found");
 
-  const handleSendRequest = async () => {
-    if (!searchResult) return;
-  
-    try {
-      const response = await axios.post("http://localhost:5173/api/friends/request", {
-        senderID: "4KA4OGBZjodxgSD0yrx4c1fXOrx1",
-        receiverQuery: searchResult.Username,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        }
-      });
-  
-      setMessage(response.data.message);
+      const user = await res.json();
+      console.log("✅ User found:", user);
+      setSearchResult(user);
     } catch (error) {
-      console.error("🚨 Error in request:", error.response || error);
-  
-      if (error.response?.data?.message) {
-        setMessage(error.response.data.message);
-      } else {
-        setMessage("❌ Error occurred while sending friend request.");
-      }
+      console.error("❌ Search error:", error.message);
+      setErrorMessage("User not found.");
     }
   };
-  
-  
 
   return (
     <div className="mb-6">
       <div className="flex mb-2">
         <input
           type="text"
-          placeholder="Search by username or ID"
+          placeholder="Search by username or email"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border p-2 rounded w-64"
@@ -77,17 +45,11 @@ const FriendSearch = () => {
       </div>
 
       {errorMessage && <p className="text-red-500 mt-1">{errorMessage}</p>}
-      {successMessage && <p className="text-green-500 mt-1">{successMessage}</p>}
 
       {searchResult && (
-        <div className="bg-gray-100 p-4 rounded shadow-md mt-3 flex justify-between items-center">
-          <span>{searchResult.Username} (ID: {searchResult.UserID})</span>
-          <button
-            onClick={handleSendRequest}
-            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Send Request
-          </button>
+        <div className="bg-white p-4 rounded shadow flex justify-between items-center">
+          <span className="text-lg font-semibold">{searchResult.username}</span>
+          <FriendAddRequest receiverQuery={searchResult.username} />
         </div>
       )}
     </div>

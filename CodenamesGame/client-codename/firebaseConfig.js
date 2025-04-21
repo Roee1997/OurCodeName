@@ -6,6 +6,7 @@ import { getFirestore } from "firebase/firestore"; // אם אתה משתמש ב-
 const firebaseConfig = {
     apiKey: "AIzaSyBYiVKL47LOy7T-piEMQtkZTBHzl3ljrjg",
     authDomain: "codename-aaec0.firebaseapp.com",
+    databaseURL: "https://codename-aaec0-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "codename-aaec0",
     storageBucket: "codename-aaec0.firebasestorage.app",
     messagingSenderId: "887660616518",

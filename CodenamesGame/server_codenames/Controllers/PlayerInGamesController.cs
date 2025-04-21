@@ -32,45 +32,84 @@ namespace server_codenames.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [HttpGet("{gameId}/is-ready")]
+        public IActionResult IsGameReady(int gameId)
+        {
+            try
+            {
+                List<PlayerInGame> players = PlayerInGame.GetPlayersInGame(gameId);
+
+                if (players.Count != 4)
+                    return Ok(new { isReady = false });
+
+                var redTeam = players.Where(p => p.Team == "Red").ToList();
+                var blueTeam = players.Where(p => p.Team == "Blue").ToList();
+
+                bool redValid = redTeam.Count == 2 &&
+                                redTeam.Any(p => p.IsSpymaster) &&
+                                redTeam.Any(p => !p.IsSpymaster);
+
+                bool blueValid = blueTeam.Count == 2 &&
+                                 blueTeam.Any(p => p.IsSpymaster) &&
+                                 blueTeam.Any(p => !p.IsSpymaster);
+
+                bool isReady = redValid && blueValid;
+
+                return Ok(new { isReady });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         // POST api/<PlayerInGamesController>
-        
-       
-[HttpPost("{gameId}/join")]
-public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
-{
-    try
-    {
-        player.GameID = gameId; // ליתר ביטחון, תעדכן מ־URL
+        [HttpPost("{gameId}/join")]
+        public IActionResult JoinGame(int gameId, [FromBody] PlayerInGame player)
+        {
+            try
+            {
+                player.GameID = gameId;
+                bool success = player.JoinGame();
+                return success ? Ok(new { message = "הצטרפות הצליחה" }) : Ok(new { message = "השחקן כבר במשחק" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
 
-        bool success = player.JoinGame();
-        return success ? Ok() : BadRequest("ההצטרפות נכשלה");
-    }
-    catch (Exception ex)
-    {
-        return BadRequest(new { error = ex.Message });
-    }
-}
 
-     [HttpPut("{gameId}/update-player")]
-public IActionResult UpdatePlayer(int gameId, [FromBody] PlayerInGame player)
-{
-    try
-    {
-        player.GameID = gameId;
-        bool success = player.UpdatePlayer();
+        [HttpPut("{gameId}/update-player")]
+        public IActionResult UpdatePlayer(int gameId, [FromBody] PlayerInGame player)
+        {
+            try
+            {
+                if (player == null)
+                    return BadRequest(new { error = "Player is null" });
 
-        // ✅ החזר תשובה תקינה אם הצליח
-        if (success)
-            return Ok(new { message = "עודכן בהצלחה" });
+                if (string.IsNullOrEmpty(player.UserID))
+                    return BadRequest(new { error = "Missing UserID" });
 
-        // ❗ אם לא עודכן (affected == 0) – עדיין להחזיר תשובה תקינה כדי לא לשבור את React
-        return Ok(new { message = "לא בוצע שינוי, אבל אין שגיאה" });
-    }
-    catch (Exception ex)
-    {
-        return BadRequest(new { error = ex.Message });
-    }
-}
+                if (string.IsNullOrEmpty(player.Team))
+                    return BadRequest(new { error = "Missing Team" });
+
+                if (string.IsNullOrEmpty(player.Username))
+                    return BadRequest(new { error = "Missing Username" });
+
+                player.GameID = gameId;
+
+                bool success = player.UpdatePlayer();
+
+                return success
+                    ? Ok(new { message = "עודכן בהצלחה" })
+                    : Ok(new { message = "לא בוצע שינוי" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
 
         // DELETE api/<PlayerInGamesController>/5
         [HttpDelete("{id}")]

@@ -28,3 +28,26 @@ export const subscribeToLobbyPlayers = (gameId, callback) => {
     callback(players);
   });
 };
+
+/**
+ * שומר את לוח המשחק ב־Realtime Database
+ * @param {string} gameId - מזהה המשחק
+ * @param {Array} cards - מערך קלפים
+ */
+export const saveBoardToFirebase = (gameId, cards) => {
+  const boardRef = ref(db, `games/${gameId}/cards`);
+  return set(boardRef, cards);
+};
+
+/**
+ * האזנה לשינויים בלוח Id - מזהה המשחק
+ * @param {function} callback - פונקציה שתרוץ כשיש שינוי
+ */
+export const subscribeToBoard = (gameId, callback) => {
+  const boardRef = ref(db, `games/${gameId}/cards`);
+  return onValue(boardRef, (snapshot) => {
+    const data = snapshot.val();
+    const cards = data ? Object.values(data) : [];
+    callback(cards);
+  });
+};

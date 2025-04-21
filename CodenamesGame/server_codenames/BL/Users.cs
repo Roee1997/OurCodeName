@@ -3,7 +3,7 @@ using Server_codenames.DAL;
 
 namespace server_codenames.BL
 {
-    public class User
+    public class Users
     {
 
         private string userID;
@@ -11,7 +11,7 @@ namespace server_codenames.BL
         private string email;
         private DateTime registrationDate;
 
-        public User(string userID, string username, string email, DateTime registrationDate)
+        public Users(string userID, string username, string email, DateTime registrationDate)
         {
             UserID = userID;
             Username = username;

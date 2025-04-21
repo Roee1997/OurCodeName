@@ -360,7 +360,7 @@ namespace Server_codenames.DAL
         //--------------------------------------------------------------------------------------------------
         // USER
         //--------------------------------------------------------------------------------------------------
-        public bool RegisterUserDB(User user)
+        public bool RegisterUserDB(server_codenames.BL.Users user)
         {
             SqlConnection con;
             SqlCommand cmd;

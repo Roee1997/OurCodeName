@@ -40,8 +40,7 @@ export const saveBoardToFirebase = (gameId, cards) => {
 };
 
 /**
- * האזנה לשינויים בלוח המשחק (קלפים)
- * @param {string} gameId - מזהה המשחק
+ * האזנה לשינויים בלוח Id - מזהה המשחק
  * @param {function} callback - פונקציה שתרוץ כשיש שינוי
  */
 export const subscribeToBoard = (gameId, callback) => {

@@ -1,4 +1,5 @@
-import { onValue, ref, set } from "firebase/database";
+import { onValue, push, ref, set } from "firebase/database";
+
 import { db } from "../../firebaseConfig"; // בגלל שהfirebaseConfig.js נמצא בשורש
 /**
  * שומר שחקן ב־Realtime Database
@@ -32,6 +33,21 @@ export const updateCardInFirebase = (gameId, updatedCard) => {
   const cardRef = ref(db, `games/${gameId}/cards/${updatedCard.cardID}`);
   return set(cardRef, updatedCard);
 };
+// שמירת רמז ב־Realtime Database
+export const sendClueToFirebase = (gameId, clue) => {
+  const cluesRef = ref(db, `games/${gameId}/clues`);
+  return push(cluesRef, clue); // 🔁 שומר כל רמז כרשומה נפרדת
+};
+
+// האזנה לרמזים
+export const subscribeToClues = (gameId, callback) => {
+  const cluesRef = ref(db, `games/${gameId}/clues`);
+  return onValue(cluesRef, (snapshot) => {
+    const data = snapshot.val();
+    callback(data ? Object.values(data) : []);
+  });
+};
+
 
 /**
  * שומר את לוח המשחק ב־Realtime Database

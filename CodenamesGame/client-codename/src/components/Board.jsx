@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../css/Board.css"; // 👈 נתיב נכון לפי המבנה שלך
 import Card from "./Card";
 
 const Board = ({ gameId, user }) => {
@@ -28,7 +29,7 @@ const Board = ({ gameId, user }) => {
   if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;
 
   return (
-    <div className="grid grid-cols-5 gap-4 mt-4">
+    <div className="board-container">
       {cards.map((card) => (
         <Card
           key={card.cardID}

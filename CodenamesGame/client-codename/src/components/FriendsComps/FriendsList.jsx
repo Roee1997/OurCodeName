@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { auth } from "../../firebaseConfig";
-import { subscribeToFriendSync } from "../services/firebaseService";
-import { notifyFriendSync } from "../services/firebaseService"; // או הנתיב שמתאים אצלך
+import { auth } from "../../../firebaseConfig";
+import { subscribeToFriendSync } from "../../services/firebaseService";
+import { notifyFriendSync } from "../../services/firebaseService"; // או הנתיב שמתאים אצלך
 
 
 

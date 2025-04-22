@@ -66,3 +66,18 @@ export const subscribeToTurn = (gameId, callback) => {
     callback(team);
   });
 };
+
+// שמירת הרמז האחרון
+export const setLastClue = (gameId, clue) => {
+  const lastClueRef = ref(db, `games/${gameId}/lastClue`);
+  return set(lastClueRef, clue);
+};
+
+// האזנה לרמז האחרון
+export const subscribeToLastClue = (gameId, callback) => {
+  const lastClueRef = ref(db, `games/${gameId}/lastClue`);
+  return onValue(lastClueRef, (snapshot) => {
+    const clue = snapshot.val();
+    callback(clue);
+  });
+};

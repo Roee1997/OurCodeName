@@ -57,10 +57,16 @@ const Game = () => {
 
       <div className="flex gap-6">
         <div className="flex-1">
-          <Board gameId={gameId} user={user} />
+        <Board
+          gameId={gameId}
+          user={user}
+          team={team}
+          isSpymaster={isSpymaster}
+          currentTurn={currentTurn}
+        />
           {isSpymaster && team && (
             <div className="mt-4">
-              <CluePanel gameId={gameId} team={team} />
+              <CluePanel gameId={gameId} team={team} currentTurn={currentTurn} />
             </div>
           )}
         </div>

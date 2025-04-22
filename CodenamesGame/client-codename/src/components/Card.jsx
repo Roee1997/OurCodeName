@@ -66,7 +66,10 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
                   ? "#ffdddd"
                   : team === "Blue"
                   ? "#ddddff"
+                  :team === "Assassin"
+                  ? "#888888"
                   : "#eeeeee",
+
               border: "1px solid black",
             }
       }

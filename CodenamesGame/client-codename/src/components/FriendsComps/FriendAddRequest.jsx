@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../../firebaseConfig";
-import { notifyFriendSync } from "../services/firebaseService";
+import { auth, db } from "../../../firebaseConfig";
+import { notifyFriendSync } from "../../services/firebaseService";
 import { set, ref, onValue } from "firebase/database";
 
 const FriendAddRequest = ({ receiverUser }) => {

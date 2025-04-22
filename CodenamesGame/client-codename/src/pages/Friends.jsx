@@ -1,7 +1,7 @@
 import React from "react";
-import FriendSearch from "../components/FriendSearch";
-import FriendsPendingRequests from "../components/FriendsPendingRequests"; // ⬅️ ייבוא הקומפוננטה החדשה
-import FriendsList from "../components/FriendsList";
+import FriendSearch from "../components/FriendsComps/FriendSearch";
+import FriendsPendingRequests from "../components/FriendsComps/FriendsPendingRequests"; // ⬅️ ייבוא הקומפוננטה החדשה
+import FriendsList from "../components/FriendsComps/FriendsList";
 
 const Friends = () => {
   return (

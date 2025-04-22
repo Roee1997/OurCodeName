@@ -1,11 +1,6 @@
 import { onValue, push, ref, set } from "firebase/database";
-
 import { db } from "../../firebaseConfig"; // בגלל שהfirebaseConfig.js נמצא בשורש
-/**
- * שומר שחקן ב־Realtime Database
- * @param {string} gameId - מזהה המשחק
- * @param {object} player - { userID, username, team, isSpymaster }
- */
+
 export const savePlayerToLobby = (gameId, player) => {
   const playerRef = ref(db, `lobbies/${gameId}/players/${player.userID}`);
   return set(playerRef, {
@@ -15,11 +10,6 @@ export const savePlayerToLobby = (gameId, player) => {
   });
 };
 
-/**
- * האזנה לשינויים ברשימת שחקנים בלובי
- * @param {string} gameId - מזהה המשחק
- * @param {function} callback - פונקציה שתרוץ כשיש שינוי
- */
 export const subscribeToLobbyPlayers = (gameId, callback) => {
   const playersRef = ref(db, `lobbies/${gameId}/players`);
   return onValue(playersRef, (snapshot) => {
@@ -28,18 +18,17 @@ export const subscribeToLobbyPlayers = (gameId, callback) => {
     callback(players);
   });
 };
-// 🔄 שומר קלף שהתעדכן (למשל נחשף)
+
 export const updateCardInFirebase = (gameId, updatedCard) => {
   const cardRef = ref(db, `games/${gameId}/cards/${updatedCard.cardID}`);
   return set(cardRef, updatedCard);
 };
-// שמירת רמז ב־Realtime Database
+
 export const sendClueToFirebase = (gameId, clue) => {
   const cluesRef = ref(db, `games/${gameId}/clues`);
   return push(cluesRef, clue); // 🔁 שומר כל רמז כרשומה נפרדת
 };
 
-// האזנה לרמזים
 export const subscribeToClues = (gameId, callback) => {
   const cluesRef = ref(db, `games/${gameId}/clues`);
   return onValue(cluesRef, (snapshot) => {
@@ -48,27 +37,32 @@ export const subscribeToClues = (gameId, callback) => {
   });
 };
 
-
-/**
- * שומר את לוח המשחק ב־Realtime Database
- * @param {string} gameId - מזהה המשחק
- * @param {Array} cards - מערך קלפים
- */
 export const saveBoardToFirebase = (gameId, cards) => {
   const boardRef = ref(db, `games/${gameId}/cards`);
   return set(boardRef, cards);
 };
 
-/**
- * האזנה לשינויים בלוח Id - מזהה המשחק
- * @param {function} callback - פונקציה שתרוץ כשיש שינוי
- */
 export const subscribeToBoard = (gameId, callback) => {
   const boardRef = ref(db, `games/${gameId}/cards`);
   return onValue(boardRef, (snapshot) => {
     const data = snapshot.val();
     const cards = data ? Object.values(data) : [];
-    console.log("📦 קלפים מ־Firebase:", cards); // ✅ תצוגה בקונסול
+    console.log("📦 קלפים מ־Firebase:", cards);
     callback(cards);
+  });
+};
+
+// ✅ חדש: הגדרת תור נוכחי
+export const setTurn = (gameId, team) => {
+  const turnRef = ref(db, `games/${gameId}/turn`);
+  return set(turnRef, team);
+};
+
+// ✅ חדש: האזנה לתור הנוכחי
+export const subscribeToTurn = (gameId, callback) => {
+  const turnRef = ref(db, `games/${gameId}/turn`);
+  return onValue(turnRef, (snapshot) => {
+    const team = snapshot.val();
+    callback(team);
   });
 };

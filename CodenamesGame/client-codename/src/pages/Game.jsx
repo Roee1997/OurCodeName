@@ -6,7 +6,7 @@ import Board from "../components/Board";
 import ClueChat from "../components/ClueChat";
 import CluePanel from "../components/CluePanel";
 import { useAuth } from "../context/AuthContext";
-import { subscribeToClues } from "../services/firebaseService";
+import { subscribeToClues, subscribeToTurn } from "../services/firebaseService";
 
 const Game = () => {
   const { gameId } = useParams();
@@ -15,6 +15,7 @@ const Game = () => {
   const [isSpymaster, setIsSpymaster] = useState(false);
   const [team, setTeam] = useState(null);
   const [clues, setClues] = useState([]);
+  const [currentTurn, setCurrentTurn] = useState(null); // ✅ חדש
 
   useEffect(() => {
     if (!gameId || !user?.uid) return;
@@ -35,6 +36,12 @@ const Game = () => {
     return () => unsubscribe();
   }, [gameId]);
 
+  useEffect(() => {
+    if (!gameId) return;
+    const unsubscribe = subscribeToTurn(gameId, setCurrentTurn); // ✅ האזנה לתור
+    return () => unsubscribe();
+  }, [gameId]);
+
   if (loading) return <p>טוען...</p>;
   if (!user) return <p>אין גישה</p>;
 
@@ -42,8 +49,13 @@ const Game = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-4 text-center">🎮 משחק שם קוד – חדר #{gameId}</h1>
 
+      {currentTurn && (
+        <div className="text-center text-xl font-semibold mb-4">
+          🎯 תור הקבוצה {currentTurn === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
+        </div>
+      )}
+
       <div className="flex gap-6">
-        {/* לוח הקלפים */}
         <div className="flex-1">
           <Board gameId={gameId} user={user} />
           {isSpymaster && team && (
@@ -53,7 +65,6 @@ const Game = () => {
           )}
         </div>
 
-        {/* צ’אט הרמזים בצד ימין */}
         <div className="w-64">
           <ClueChat clues={clues} />
         </div>

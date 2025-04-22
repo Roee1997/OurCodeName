@@ -6,48 +6,30 @@ namespace server_codenames.BL
     {
         public int CardID { get; set; }
         public int GameID { get; set; }
-        public string Word { get; set; }
+        public int WordID { get; set; } // ✅ חדש
+        public string Word { get; set; } // ✅ כדי להעביר ללקוח
         public string Team { get; set; }
         public bool IsRevealed { get; set; } = false;
 
         public Card() { }
 
-        public Card(int cardId, int gameId, string word, string team)
-        {
-            CardID = cardId;
-            GameID = gameId;
-            Word = word;
-            Team = team;
-            IsRevealed = false;
-        }
-
-        // מחזיר רשימת 25 קלפים אקראיים עם חלוקה לצוותים (אדום, כחול, ניטרלי ומתנקש)
         public static List<Card> GenerateBoard(int gameId)
         {
-            List<string> allWords = new List<string>
-    {
-        "מחשב", "שמש", "חול", "אוזן", "עכבר", "רימון", "מגדל", "שוקו",
-        "אבן", "דג", "עין", "סוס", "תפוח", "שולחן", "מכונית", "טלוויזיה",
-        "כובע", "גשר", "רובה", "קיץ", "חורף", "נחל", "בית", "אור", "צל"
-    };
+            DBservices dbs = new DBservices();
+            List<(int WordID, string Word)> words = dbs.GetRandomWords(25); // ✅ שליפת מילים מטבלת Words
 
-            if (allWords.Count < 25)
+            if (words.Count < 25)
                 throw new Exception("❌ אין מספיק מילים ליצירת לוח");
 
+            var roles = new List<string>
+            {
+                "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red",
+                "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue",
+                "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral",
+                "Assassin"
+            };
+
             var random = new Random();
-            var shuffledWords = allWords.OrderBy(w => random.Next()).Take(25).ToList();
-
-            List<string> roles = new List<string>
-    {
-        "Red", "Red", "Red", "Red", "Red", "Red", "Red", "Red",
-        "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue", "Blue",
-        "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral", "Neutral",
-        "Assassin"
-    };
-
-            if (roles.Count != 25)
-                throw new Exception("❌ מספר התפקידים (Roles) שגוי – חייבים 25");
-
             var shuffledRoles = roles.OrderBy(r => random.Next()).ToList();
 
             List<Card> cards = new List<Card>();
@@ -57,7 +39,8 @@ namespace server_codenames.BL
                 cards.Add(new Card
                 {
                     GameID = gameId,
-                    Word = shuffledWords[i],
+                    WordID = words[i].WordID,
+                    Word = words[i].Word,
                     Team = shuffledRoles[i],
                     IsRevealed = false
                 });
@@ -83,7 +66,6 @@ namespace server_codenames.BL
             DBservices dbs = new DBservices();
             return dbs.GetBoardForPlayer(gameId, userId);
         }
-
 
         public static bool RevealCard(int cardId)
         {

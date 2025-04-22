@@ -24,7 +24,7 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
       case "Red": return redTeamImg;
       case "Blue": return blueTeamImg;
       case "Neutral": return neutralImg;
-      case "Black": return assassinImg;
+      case "Assassin": return assassinImg;
       default: return ""; // למקרה של Hidden או טעות
     }
   };
@@ -33,7 +33,7 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
     if (!canClick || isRevealed) return;
 
     try {
-      await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardId}`, {
+      await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardID}`, {
         method: "PUT"
       });
       

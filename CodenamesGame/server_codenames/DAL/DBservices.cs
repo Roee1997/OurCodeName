@@ -95,9 +95,9 @@ namespace Server_codenames.DAL
                 if (con != null)
                     con.Close();
             }
-        }    
-            // ✅ Get Board For Player (Spymaster sees teams, Agent only revealed)
-            public List<Card> GetBoardForPlayer(int gameId, string userId)
+        }
+        // ✅ Get Board For Player (Spymaster sees teams, Agent only revealed)
+        public List<Card> GetBoardForPlayer(int gameId, string userId)
         {
             List<Card> cards = new List<Card>();
             SqlConnection con = null;
@@ -118,7 +118,8 @@ namespace Server_codenames.DAL
                     {
                         CardID = Convert.ToInt32(reader["CardID"]),
                         GameID = Convert.ToInt32(reader["GameID"]),
-                        Word = reader["Word"].ToString(),
+                        WordID = Convert.ToInt32(reader["WordID"]), // ✅ חדש
+                        Word = reader["Word"].ToString(),           // ✅ מתוך טבלת Words
                         IsRevealed = Convert.ToBoolean(reader["IsRevealed"]),
                         Team = reader["Team"] == DBNull.Value ? null : reader["Team"].ToString()
                     };
@@ -138,6 +139,41 @@ namespace Server_codenames.DAL
             }
         }
 
+        public List<(int WordID, string Word)> GetRandomWords(int count = 25)
+        {
+            SqlConnection con = null;
+            List<(int, string)> words = new List<(int, string)>();
+
+            try
+            {
+                con = connect("myProjDB");
+
+                SqlCommand cmd = new SqlCommand("sp_GetRandomWords", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Count", count);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    int wordId = Convert.ToInt32(reader["WordID"]);
+                    string word = reader["Word"].ToString();
+                    words.Add((wordId, word));
+                }
+
+                return words;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
+
+
         public bool InsertCards(List<Card> cards)
         {
             SqlConnection con = connect("myProjDB");
@@ -149,10 +185,13 @@ namespace Server_codenames.DAL
                     if (string.IsNullOrEmpty(card.Team))
                         throw new Exception("Team לא מוגדר באחד הקלפים");
 
+                    if (card.WordID == 0)
+                        throw new Exception("WordID חסר באחד הקלפים");
+
                     SqlCommand cmd = CreateCommandWithStoredProcedure("sp_InsertCard", con, new Dictionary<string, object>
             {
                 { "@GameID", card.GameID },
-                { "@Word", card.Word },
+                { "@WordID", card.WordID }, // 🆕 שימוש ב־WordID
                 { "@Team", card.Team },
                 { "@IsRevealed", card.IsRevealed }
             });
@@ -173,47 +212,48 @@ namespace Server_codenames.DAL
             }
         }
         public List<Card> GetCardsForGame(int gameId)
-{
-    List<Card> cards = new List<Card>();
-    SqlConnection con = null;
-
-    try
-    {
-        con = connect("myProjDB");
-
-        SqlCommand cmd = new SqlCommand("sp_GetCardsForGame", con);
-        cmd.CommandType = CommandType.StoredProcedure;
-        cmd.Parameters.AddWithValue("@GameID", gameId);
-
-        SqlDataReader reader = cmd.ExecuteReader();
-        while (reader.Read())
         {
-            Card card = new Card
-            {
-                CardID = Convert.ToInt32(reader["CardID"]),
-                GameID = Convert.ToInt32(reader["GameID"]),
-                Word = reader["Word"].ToString(),
-                Team = reader["Team"].ToString(),
-                IsRevealed = Convert.ToBoolean(reader["IsRevealed"])
-            };
+            List<Card> cards = new List<Card>();
+            SqlConnection con = null;
 
-            cards.Add(card);
+            try
+            {
+                con = connect("myProjDB");
+
+                SqlCommand cmd = new SqlCommand("sp_GetCardsForGame", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@GameID", gameId);
+
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Card card = new Card
+                    {
+                        CardID = Convert.ToInt32(reader["CardID"]),
+                        GameID = Convert.ToInt32(reader["GameID"]),
+                        WordID = Convert.ToInt32(reader["WordID"]), // ✅ חדש
+                        Word = reader["Word"].ToString(),           // ✅ נשמר בשביל הצגה
+                        Team = reader["Team"].ToString(),
+                        IsRevealed = Convert.ToBoolean(reader["IsRevealed"])
+                    };
+
+                    cards.Add(card);
+                }
+
+                return cards;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
-        return cards;
-    }
-    catch (Exception ex)
-    {
-        throw ex;
-    }
-    finally
-    {
-        if (con != null)
-            con.Close();
-    }
-}
-
-    public bool RevealCard(int cardId)
+        public bool RevealCard(int cardId)
     {
         SqlConnection con = connect("myProjDB");
 

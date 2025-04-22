@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { subscribeToBoard } from "../services/firebaseService"; // נוודא שהשירות הזה קיים
 import Card from "./Card";
 
 const Board = ({ gameId, user }) => {
@@ -19,28 +18,23 @@ const Board = ({ gameId, user }) => {
     }
   };
 
-
   useEffect(() => {
-    if (gameId) {
-      const unsubscribe = subscribeToBoard(gameId, (cardsFromFirebase) => {
-        setCards(cardsFromFirebase);
-        setLoading(false);
-      });
-      return () => unsubscribe();
+    if (gameId && user?.uid) {
+      fetchBoard();
     }
-  }, [gameId]);  
+  }, [gameId, user?.uid]);
 
   if (loading) return <p className="text-center">⏳ טוען לוח...</p>;
   if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;
 
   return (
-    <div className="grid grid-cols-4 gap-4 mt-4">
+    <div className="grid grid-cols-5 gap-4 mt-4">
       {cards.map((card) => (
         <Card
           key={card.cardID}
           card={card}
           gameId={gameId}
-          canClick={!card.isRevealed} // ניתן ללחוץ רק על קלפים שלא נחשפו
+          canClick={!card.isRevealed}
           onCardRevealed={fetchBoard}
         />
       ))}

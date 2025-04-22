@@ -27,6 +27,11 @@ export const subscribeToLobbyPlayers = (gameId, callback) => {
     callback(players);
   });
 };
+// 🔄 שומר קלף שהתעדכן (למשל נחשף)
+export const updateCardInFirebase = (gameId, updatedCard) => {
+  const cardRef = ref(db, `games/${gameId}/cards/${updatedCard.cardID}`);
+  return set(cardRef, updatedCard);
+};
 
 /**
  * שומר את לוח המשחק ב־Realtime Database

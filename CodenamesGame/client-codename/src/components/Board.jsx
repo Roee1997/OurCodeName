@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "../css/Board.css"; // 👈 נתיב נכון לפי המבנה שלך
+import "../css/Board.css";
+import { subscribeToBoard } from "../services/firebaseService"; // נוודא שזה קיים
 import Card from "./Card";
 
 const Board = ({ gameId, user }) => {
@@ -19,11 +20,24 @@ const Board = ({ gameId, user }) => {
     }
   };
 
+  // טעינה ראשונית מהשרת
   useEffect(() => {
     if (gameId && user?.uid) {
       fetchBoard();
     }
   }, [gameId, user?.uid]);
+
+  // האזנה לפיירבייס – רק כדי להפעיל fetchBoard מחדש
+  useEffect(() => {
+    if (!gameId) return;
+
+    const unsubscribe = subscribeToBoard(gameId, () => {
+      console.log("📡 שינוי מ־Firebase → מבצע fetchBoard()");
+      fetchBoard(); // 🔁 קורא לפונקציה הבטוחה שלך
+    });
+
+    return () => unsubscribe();
+  }, [gameId]);
 
   if (loading) return <p className="text-center">⏳ טוען לוח...</p>;
   if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;

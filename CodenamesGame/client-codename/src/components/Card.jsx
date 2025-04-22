@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import React from "react";
-import "../css/Card.css"; // ✅ נתיב לקובץ העיצוב
-
 import assassinImg from "../assets/assasin.jpg";
 import blueTeamImg from "../assets/blueteam.jpeg";
 import neutralImg from "../assets/neutral.jpeg";
 import redTeamImg from "../assets/redteam.jpeg";
+import "../css/Card.css";
+import { updateCardInFirebase } from "../services/firebaseService";
 
 const Card = ({ card, gameId, canClick, onCardRevealed }) => {
   const { word, team, isRevealed, cardID } = card;
@@ -24,11 +24,22 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
     if (!canClick || isRevealed) return;
 
     try {
-      await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardID}`, {
+      const res = await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardID}`, {
         method: "PUT"
       });
-
-      if (onCardRevealed) onCardRevealed();
+  
+      if (!res.ok) {
+        console.error("❌ שגיאה בגילוי קלף בשרת");
+        return;
+      }
+  
+      // ✅ עדכון בזמן אמת ב-Firebase
+      await updateCardInFirebase(gameId, {
+        ...card,
+        isRevealed: true
+      });
+  
+      if (onCardRevealed) onCardRevealed(); // אופציונלי - אפשר להסיר אם לא דרוש
     } catch (error) {
       console.error("❌ שגיאה בגילוי קלף:", error);
     }

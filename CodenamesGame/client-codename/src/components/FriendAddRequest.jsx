@@ -1,50 +1,47 @@
 import React, { useState, useEffect } from "react";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 import { notifyFriendSync } from "../services/firebaseService";
 import { set, ref, onValue } from "firebase/database";
-import { db } from "../../firebaseConfig";
 
-const FriendAddRequest = ({ receiverQuery }) => {
+const FriendAddRequest = ({ receiverUser }) => {
   const [message, setMessage] = useState("");
-  const [hideButton, setHideButton] = useState(false);
+  const [hideBox, setHideBox] = useState(false);
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || !currentUser.uid || !receiverQuery) return;
+    if (!currentUser?.uid || !receiverUser?.userID) return;
 
     const senderID = currentUser.uid;
-    const statusRef = ref(db, `friendRequestsStatus/${senderID}/${receiverQuery}`);
+    const receiverID = receiverUser.userID;
+    const statusRef = ref(db, `friendRequestsStatus/${senderID}/${receiverID}`);
 
     const unsubscribe = onValue(statusRef, (snapshot) => {
       const status = snapshot.val();
-      if (!status || status !== "Pending") {
-        setHideButton(false);
-      } else {
-        setHideButton(true);
+      if (status && ["Approved", "Cancelled", "Rejected"].includes(status)) {
+        setHideBox(true); // hide the whole box
       }
     });
 
     return () => unsubscribe();
-  }, [receiverQuery]);
+  }, [receiverUser]);
 
   const handleSendRequest = async () => {
-    const currentUser = auth.currentUser;
-
-    if (!currentUser || !currentUser.uid) {
-      setMessage("❌ You must be logged in to send friend requests.");
+    if (!currentUser || !receiverUser?.userID) {
+      setMessage("❌ Invalid sender or receiver.");
       return;
     }
 
     const senderID = currentUser.uid;
+    const receiverID = receiverUser.userID;
 
     try {
       const res = await fetch("http://localhost:5150/api/friends/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
-        body: JSON.stringify({ senderID, receiverQuery })
+        body: JSON.stringify({ senderID, receiverQuery: receiverUser.username }),
       });
 
       const data = await res.json();
@@ -52,18 +49,12 @@ const FriendAddRequest = ({ receiverQuery }) => {
       if (res.ok) {
         setMessage("✅ " + data.message);
 
-        // Get receiver's userID by re-searching
-        const userRes = await fetch(`http://localhost:5150/api/friends/search?query=${receiverQuery}`);
-        if (userRes.ok) {
-          const foundUser = await userRes.json();
+        // Save request status to Firebase for realtime sync
+        await set(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`), "Pending");
 
-          // Save request status to Firebase for realtime update
-          await set(ref(db, `friendRequestsStatus/${senderID}/${foundUser.userID}`), "Pending");
-
-          // Trigger real-time sync update for both sides
-          await notifyFriendSync(senderID);
-          await notifyFriendSync(foundUser.userID);
-        }
+        // Trigger UI refresh for both users
+        await notifyFriendSync(senderID);
+        await notifyFriendSync(receiverID);
       } else {
         setMessage("❌ " + (data.message || "Failed to send request"));
       }
@@ -73,16 +64,16 @@ const FriendAddRequest = ({ receiverQuery }) => {
     }
   };
 
+  if (hideBox) return null;
+
   return (
     <div className="flex flex-col items-end ml-4">
-      {!hideButton && (
-        <button
-          onClick={handleSendRequest}
-          className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Send Request
-        </button>
-      )}
+      <button
+        onClick={handleSendRequest}
+        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        Send Request
+      </button>
       {message && <p className="mt-2 text-sm">{message}</p>}
     </div>
   );

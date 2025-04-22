@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { auth } from "../../firebaseConfig";
 import { subscribeToFriendSync } from "../services/firebaseService";
 import { notifyFriendSync } from "../services/firebaseService";
+import { remove, ref } from "firebase/database";
+import { db } from "../../firebaseConfig";
+
+
 
 
 const FriendsPendingRequests = () => {

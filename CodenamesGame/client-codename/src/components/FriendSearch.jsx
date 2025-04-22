@@ -49,7 +49,7 @@ const FriendSearch = () => {
       {searchResult && (
         <div className="bg-white p-4 rounded shadow flex justify-between items-center">
           <span className="text-lg font-semibold">{searchResult.username}</span>
-          <FriendAddRequest receiverQuery={searchResult.username} />
+          <FriendAddRequest receiverUser={searchResult} />
         </div>
       )}
     </div>

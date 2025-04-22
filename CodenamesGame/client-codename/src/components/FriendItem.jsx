@@ -2,12 +2,30 @@ import React from "react";
 import { removeFriend } from "../services/friendsService";
 
 const FriendItem = ({ friend, onRemove }) => {
-  const handleRemoveFriend = async () => {
+  const handleRemoveFriend = async (friendID) => {
     try {
-      await removeFriend(friend.UserID);
-      onRemove();
+      const res = await fetch("http://localhost:5150/api/friends/remove", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userID: userId,
+          friendID: friendID
+        })
+      });
+  
+      const data = await res.json();
+      console.log("🧹 Friend removed:", data);
+  
+      if (res.ok) {
+        await notifyFriendSync(userId);      // שולח הרענון
+        await notifyFriendSync(friendID);    // הצד השני מקבל רענון
+      }
+  
+      fetchFriends();
     } catch (error) {
-      console.error("Error removing friend:", error);
+      console.error("❌ Error removing friend:", error);
     }
   };
 

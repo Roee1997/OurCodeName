@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../../firebaseConfig";
+import { subscribeToFriendSync } from "../services/firebaseService";
+import { notifyFriendSync } from "../services/firebaseService";
+
 
 const FriendsPendingRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -10,10 +13,14 @@ const FriendsPendingRequests = () => {
   const userId = currentUser?.uid;
 
   useEffect(() => {
-    if (userId) {
+    if (!userId) return;
+
+    const unsubscribe = subscribeToFriendSync(userId, () => {
       fetchPendingRequests();
       fetchReceivedRequests();
-    }
+    });
+
+    return () => unsubscribe();
   }, [userId]);
 
   const fetchPendingRequests = async () => {
@@ -40,6 +47,34 @@ const FriendsPendingRequests = () => {
     }
   };
 
+
+  const handleAcceptRequest = async (senderID, receiverID) => {
+    try {
+      const res = await fetch("http://localhost:5150/api/friends/accept", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ senderID, receiverID })
+      });
+
+      const data = await res.json();
+      console.log("✅ Accept response:", data);
+
+      if (res.ok) {
+        await notifyFriendSync(senderID);
+        await notifyFriendSync(receiverID);
+      }
+
+      fetchPendingRequests();
+      fetchReceivedRequests();
+    } catch (error) {
+      console.error("❌ Error accepting friend request:", error);
+    }
+    // הסרת רשומת המעקב
+    await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
+  };
+
   const updateRequestStatus = async (senderID, receiverID, action) => {
     try {
       const res = await fetch("http://localhost:5150/api/friends/cancel", {
@@ -53,33 +88,20 @@ const FriendsPendingRequests = () => {
       const data = await res.json();
       console.log("✅ Status updated:", data);
 
+      if (res.ok) {
+        await notifyFriendSync(senderID);
+        await notifyFriendSync(receiverID);
+      }
+
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
       console.error("❌ Error updating request status:", error);
     }
+    // הסרת רשומת המעקב
+    await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
   };
 
-  const handleAcceptRequest = async (senderID, receiverID) => {
-    try {
-      const res = await fetch("http://localhost:5150/api/friends/accept", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ senderID, receiverID })
-      });
-  
-      const data = await res.json();
-      console.log("✅ Accept response:", data);
-  
-      fetchPendingRequests();
-      fetchReceivedRequests();
-    } catch (error) {
-      console.error("❌ Error accepting friend request:", error);
-    }
-  };
-  
 
   return (
     <div className="mb-8">
@@ -110,7 +132,7 @@ const FriendsPendingRequests = () => {
               ))}
             </ul>
           )}
-  
+
           {/* 🔹 Received Requests */}
           <h2 className="text-xl font-semibold mb-2">Received Friend Requests</h2>
           {receivedRequests.length === 0 ? (
@@ -145,7 +167,7 @@ const FriendsPendingRequests = () => {
       )}
     </div>
   );
-  
+
 };
 
 export default FriendsPendingRequests;

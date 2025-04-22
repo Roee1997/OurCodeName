@@ -51,3 +51,17 @@ export const subscribeToBoard = (gameId, callback) => {
     callback(cards);
   });
 };
+
+// Trigger realtime friend sync (write a timestamp)
+export const notifyFriendSync = (userId) => {
+  const syncRef = ref(db, `friendSync/${userId}`);
+  return set(syncRef, Date.now());
+};
+
+// Listen for changes in friendSync/{userId}
+export const subscribeToFriendSync = (userId, callback) => {
+  const syncRef = ref(db, `friendSync/${userId}`);
+  return onValue(syncRef, () => {
+    callback();
+  });
+};

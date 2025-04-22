@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../../firebaseConfig";
+import { subscribeToFriendSync } from "../services/firebaseService";
+import { notifyFriendSync } from "../services/firebaseService"; // או הנתיב שמתאים אצלך
+
+
 
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);
@@ -9,8 +13,20 @@ const FriendsList = () => {
   const userId = currentUser?.uid;
 
   useEffect(() => {
-    if (userId) fetchFriends();
+    if (!userId) return;
+
+    // טוען את רשימת החברים הראשונית
+    fetchFriends();
+
+    // מאזין לצפצוף בזמן אמת מרגע זה
+    const unsubscribe = subscribeToFriendSync(userId, () => {
+      fetchFriends(); // רענון הרשימה כשיש שינוי
+    });
+
+    // ניקוי מאזין ביציאה מהעמוד
+    return () => unsubscribe();
   }, [userId]);
+
 
   const fetchFriends = async () => {
     try {
@@ -38,15 +54,21 @@ const FriendsList = () => {
           friendID: friendID
         })
       });
-
+  
       const data = await res.json();
       console.log("🧹 Friend removed:", data);
-
-      fetchFriends(); // refresh list
+  
+      if (res.ok) {
+        await notifyFriendSync(userId);     // רענון עצמי
+        await notifyFriendSync(friendID);   // רענון אצל החבר
+      }
+  
+      fetchFriends(); // רענון מיידי מקומי
     } catch (error) {
       console.error("❌ Error removing friend:", error);
     }
   };
+  
 
   return (
     <div className="mb-8">

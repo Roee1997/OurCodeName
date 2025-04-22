@@ -1,6 +1,6 @@
-import { onValue, push, ref, set } from "firebase/database";
+import { ref, set, onValue, push, remove } from "firebase/database";
+import { db } from "../../firebaseConfig";
 
-import { db } from "../../firebaseConfig"; // בגלל שהfirebaseConfig.js נמצא בשורש
 /**
  * שומר שחקן ב־Realtime Database
  * @param {string} gameId - מזהה המשחק
@@ -63,6 +63,16 @@ export const saveBoardToFirebase = (gameId, cards) => {
  * האזנה לשינויים בלוח Id - מזהה המשחק
  * @param {function} callback - פונקציה שתרוץ כשיש שינוי
  */
+
+
+
+
+
+
+
+
+
+//FRIENDS SECTION////////////////////////////////////////////////////
 export const subscribeToBoard = (gameId, callback) => {
   const boardRef = ref(db, `games/${gameId}/cards`);
   return onValue(boardRef, (snapshot) => {
@@ -86,3 +96,72 @@ export const subscribeToFriendSync = (userId, callback) => {
     callback();
   });
 };
+
+
+
+// Save new message between two users
+export const sendMessage = (userId1, userId2, messageObj) => {
+  const chatId = [userId1, userId2].sort().join("_");
+  const chatRef = ref(db, `chats/${chatId}`);
+  const newMessageRef = push(chatRef);
+  return set(newMessageRef, messageObj);
+};
+
+// Listen to messages between two users
+export const subscribeToChat = (userId1, userId2, callback) => {
+  const chatId = [userId1, userId2].sort().join("_");
+  const chatRef = ref(db, `chats/${chatId}`);
+  return onValue(chatRef, (snapshot) => {
+    const messages = snapshot.val() || {};
+    const messageArray = Object.entries(messages).map(([id, value]) => ({ id, ...value }));
+    callback(messageArray);
+  });
+};
+
+// Clear chat if last message is older than 12 hours (optional helper)
+export const clearChatIfOld = async (userId1, userId2) => {
+  const chatId = [userId1, userId2].sort().join("_");
+  const chatRef = ref(db, `chats/${chatId}`);
+  onValue(chatRef, (snapshot) => {
+    const messages = snapshot.val();
+    if (!messages) return;
+
+    const lastMessage = Object.values(messages).slice(-1)[0];
+    const twelveHoursAgo = Date.now() - 12 * 60 * 60 * 1000;
+
+    if (lastMessage?.timestamp < twelveHoursAgo) {
+      remove(chatRef);
+    }
+  });
+};
+
+
+// Check if new messages were received
+export const subscribeToUnreadMessages = (userId, callback) => {
+  const unreadRef = ref(db, `unread/${userId}`);
+  return onValue(unreadRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    callback(data); // Format: { [friendId]: true }
+  });
+};
+
+// Mark messages as read after opening chat
+export const clearUnreadForFriend = (userId, friendId) => {
+  const refPath = ref(db, `unread/${userId}/${friendId}`);
+  return remove(refPath);
+};
+
+// Check if new unread message was received for a specific chat
+export const subscribeToChatMeta = (currentUserId, friendId, callback) => {
+  const notifyRef = ref(db, `unreadMessages/${currentUserId}/${friendId}`);
+  return onValue(notifyRef, (snapshot) => {
+    const hasNew = snapshot.exists();
+    callback(hasNew);
+  });
+};
+
+//FRIENDS SECTION////////////////////////////////////////////////////
+
+
+
+

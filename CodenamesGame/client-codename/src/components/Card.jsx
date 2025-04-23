@@ -23,7 +23,6 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
   const handleClick = async () => {
     if (!canClick || isRevealed) return;
 
-    // ✅ רק הסוכן של הקבוצה שבתור יכול ללחוץ
     if (userTeam !== currentTurn || isSpymaster) {
       console.warn("⛔ לא תורך או שאתה לוחש – לא ניתן לנחש");
       return;
@@ -44,31 +43,22 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
         isRevealed: true
       });
 
-      if (onCardRevealed) onCardRevealed();
+      if (onCardRevealed) onCardRevealed(card);
     } catch (error) {
       console.error("❌ שגיאה בגילוי קלף:", error);
     }
   };
 
-  const hiddenStyle = {
-    backgroundColor: "#ccc",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: "2rem",
-    fontWeight: "bold",
-    color: "#333",
-  };
+  const cardImage = getCardImage();
 
-  const revealedStyle = isRevealed
+  const cardStyle = isRevealed
     ? {
-        backgroundImage: `url(${getCardImage()})`,
+        backgroundImage: `url(${cardImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }
-    : team === "Hidden"
-    ? hiddenStyle
-    : {
+    : isSpymaster
+    ? {
         backgroundColor:
           team === "Red"
             ? "#ffdddd"
@@ -77,6 +67,9 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
             : team === "Assassin"
             ? "#888888"
             : "#eeeeee",
+      }
+    : {
+        backgroundColor: "#eeeeee", // סוכן רואה הכל אפור לפני גילוי
       };
 
   return (
@@ -87,7 +80,7 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
       transition={{ duration: 0.6 }}
       className="card-wrapper"
     >
-      <div className="card" style={revealedStyle}>
+      <div className="card" style={cardStyle}>
         {!isRevealed && (
           <div className="text-center font-bold text-lg text-black">{word}</div>
         )}

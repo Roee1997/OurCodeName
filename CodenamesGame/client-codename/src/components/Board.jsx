@@ -44,14 +44,22 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
   }, [gameId]);
 
   const handleCardClick = async (card) => {
+    const foundCard = cards.find((c) => c.cardID === card.cardID);
+
+    console.log("💡 card from cards[]:", foundCard);
     if (card.isRevealed) return;
     if (team !== currentTurn || isSpymaster) return;
-    console.log("🔍 קלף נלחץ:", card.team, "← נגד", currentTurn);
+  
+    console.log("🔍 קלף נלחץ:", card.team, "← תור:", currentTurn);
+  
     const res = await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${card.cardID}`, {
       method: "PUT",
     });
   
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error("❌ שגיאה ב־API של reveal");
+      return;
+    }
   
     await fetchBoard();
   
@@ -60,35 +68,36 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
   
     const maxGuesses = lastClue?.number ?? 0;
   
-    const isAssassin = card.team === "Assassin";
-    const isNeutral = card.team === "Neutral";
-    const isOwnTeam = card.team === currentTurn;
+    const cardTeam = card.team?.trim();
+    const isAssassin = cardTeam === "Assassin";
+    const isNeutral = cardTeam === "Neutral";
+    const isOwnTeam = cardTeam === currentTurn;
+    const isOpponent = (cardTeam === "Red" || cardTeam === "Blue") && cardTeam !== currentTurn;
   
-    // ✅ מתקן את התנאי לזיהוי קלף של היריב בלבד
-    const isOpponent =
-      (card.team === "Red" || card.team === "Blue") &&
-      card.team !== currentTurn;
-  
-    // 🔁 תור עובר מיידית במקרה של טעות
-    if (isAssassin || isOpponent) {
+    if (isAssassin) {
+      console.log("💀 קלף מתנקש – מעביר תור מייד");
       const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
       await setTurn(gameId, nextTeam);
-      console.log(`⛔ טעות (יריב או מתנקש) → תור עבר ל־${nextTeam}`);
       return;
     }
   
-    // ✅ אם זה הניחוש האחרון (שלי או נייטרלי) – תור עובר
+    if (isOpponent) {
+      console.log("❌ קלף של היריב – מעביר תור מייד");
+      const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
+      await setTurn(gameId, nextTeam);
+      return;
+    }
+  
     if (newGuessCount >= maxGuesses) {
+      console.log("✅ מוצו הניחושים – מעביר תור");
       const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
       await setTurn(gameId, nextTeam);
-      console.log(`✅ מוצו כל הניחושים → תור עבר ל־${nextTeam}`);
       return;
     }
   
-    // ✅ אחרת התור נמשך
-    console.log("✅ ניחוש תקף – התור ממשיך");
+    console.log(`✅ ניחוש תקף – ניחוש מספר ${newGuessCount} מתוך ${maxGuesses}`);
   };
-    
+      
 
   if (loading) return <p className="text-center">⏳ טוען לוח...</p>;
   if (cards.length === 0) return <p className="text-center text-red-500">😢 אין קלפים להצגה</p>;
@@ -101,7 +110,7 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
           card={card}
           gameId={gameId}
           canClick={!card.isRevealed}
-          onCardRevealed={() => handleCardClick(card)}
+          onCardRevealed={handleCardClick}
           currentTurn={currentTurn}
           userTeam={team}
           isSpymaster={isSpymaster}

@@ -5,7 +5,6 @@ import blueTeamImg from "../assets/blueteam.jpeg";
 import neutralImg from "../assets/neutral.jpeg";
 import redTeamImg from "../assets/redteam.jpeg";
 import "../css/Card.css";
-import { updateCardInFirebase } from "../services/firebaseService";
 
 const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, isSpymaster }) => {
   const { word, team, isRevealed, cardID } = card;
@@ -20,7 +19,7 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
     }
   };
 
-  const handleClick = async () => {
+  const handleClick = () => {
     if (!canClick || isRevealed) return;
 
     if (userTeam !== currentTurn || isSpymaster) {
@@ -28,25 +27,8 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
       return;
     }
 
-    try {
-      const res = await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardID}`, {
-        method: "PUT"
-      });
-
-      if (!res.ok) {
-        console.error("❌ שגיאה בגילוי קלף בשרת");
-        return;
-      }
-
-      await updateCardInFirebase(gameId, {
-        ...card,
-        isRevealed: true
-      });
-
-      if (onCardRevealed) onCardRevealed(card);
-    } catch (error) {
-      console.error("❌ שגיאה בגילוי קלף:", error);
-    }
+    // ✅ רק מפעיל את פונקציית ההורה (Board)
+    if (onCardRevealed) onCardRevealed(card);
   };
 
   const cardImage = getCardImage();

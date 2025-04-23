@@ -26,11 +26,11 @@ const FriendsPendingRequests = () => {
   const fetchPendingRequests = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/pending-sent/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch sent requests");
+      if (!res.ok) throw new Error("שגיאה בטעינת הבקשות שנשלחו.");
       const data = await res.json();
       setPendingRequests(data);
     } catch (err) {
-      console.error("❌ שגיאה בשליפת בקשות שנשלחו:", err);
+      console.error("שגיאה:", err);
       setError("שגיאה בטעינת בקשות שנשלחו.");
     }
   };
@@ -38,11 +38,11 @@ const FriendsPendingRequests = () => {
   const fetchReceivedRequests = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/pending-received/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch received requests");
+      if (!res.ok) throw new Error("שגיאה בטעינת הבקשות שהתקבלו.");
       const data = await res.json();
       setReceivedRequests(data);
     } catch (err) {
-      console.error("❌ שגיאה בשליפת בקשות שהתקבלו:", err);
+      console.error("שגיאה:", err);
       setError("שגיאה בטעינת בקשות שהתקבלו.");
     }
   };
@@ -58,7 +58,7 @@ const FriendsPendingRequests = () => {
       });
 
       const data = await res.json();
-      console.log("✅ בקשה אושרה:", data);
+      console.log("בקשה אושרה:", data);
 
       if (res.ok) {
         await notifyFriendSync(senderID);
@@ -68,7 +68,7 @@ const FriendsPendingRequests = () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
-      console.error("❌ שגיאה באישור בקשה:", error);
+      console.error("שגיאה באישור בקשה:", error);
     }
 
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
@@ -85,7 +85,7 @@ const FriendsPendingRequests = () => {
       });
 
       const data = await res.json();
-      console.log("✅ סטטוס עודכן:", data);
+      console.log("סטטוס עודכן:", data);
 
       if (res.ok) {
         await notifyFriendSync(senderID);
@@ -95,7 +95,7 @@ const FriendsPendingRequests = () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
-      console.error("❌ שגיאה בעדכון סטטוס:", error);
+      console.error("שגיאה בעדכון סטטוס:", error);
     }
 
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));

@@ -1,26 +1,48 @@
 import React from "react";
 import FriendSearch from "../components/FriendsComps/FriendSearch";
-import FriendsPendingRequests from "../components/FriendsComps/FriendsPendingRequests"; // ⬅️ ייבוא הקומפוננטה החדשה
+import FriendsPendingRequests from "../components/FriendsComps/FriendsPendingRequests";
 import FriendsList from "../components/FriendsComps/FriendsList";
+import BackgroundImage from "../components/BackgroundImage";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import codenamesImage from "../assets/codename.webp";
 
 const Friends = () => {
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Friends</h1>
+    <div className="relative min-h-screen flex flex-col">
+      {/* 🔝 כותרת עליונה */}
+      <Header />
 
-      <section className="mb-8">
-        <FriendSearch />
-      </section>
+      {/* 🖼️ רקע */}
+      <BackgroundImage image={codenamesImage} />
 
-      <section className="mb-8">
-        <FriendsPendingRequests />
-      </section>
+      {/* 📦 תוכן עמוד חברים */}
+      <div className="relative z-10 container mx-auto p-6 text-white" dir="rtl">
+        <h1 className="text-4xl font-bold mb-8 text-center text-white drop-shadow">
+          ניהול חברים
+        </h1>
 
-      <section className="mb-8">
-        <FriendsList />
-      </section>
+        {/* 🔍 חיפוש שחקנים */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">חיפוש שחקנים</h2>
+          <FriendSearch />
+        </div>
 
-      {/* בהמשך נוסיף כאן את FriendsList ו-CreateGameInvite */}
+        {/* ⏳ בקשות ממתינות */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">בקשות חברים ממתינות</h2>
+          <FriendsPendingRequests />
+        </div>
+
+        {/* 🧑‍🤝‍🧑 רשימת חברים */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">רשימת חברים קיימים</h2>
+          <FriendsList />
+        </div>
+      </div>
+
+      {/* ⚓ פוטר */}
+      <Footer className="mt-auto" />
     </div>
   );
 };

@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../../../firebaseConfig";
-import { subscribeToFriendSync } from "../../services/firebaseService";
-import { notifyFriendSync } from "../../services/firebaseService"; // או הנתיב שמתאים אצלך
-
-
+import {
+  subscribeToFriendSync,
+  notifyFriendSync,
+  subscribeToChatMeta
+} from "../../services/firebaseService";
+import ChatWindow from "../Chatwindow";
 
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);
   const [error, setError] = useState("");
+  const [openChats, setOpenChats] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState({});
 
   const currentUser = auth.currentUser;
   const userId = currentUser?.uid;
@@ -15,30 +19,41 @@ const FriendsList = () => {
   useEffect(() => {
     if (!userId) return;
 
-    // טוען את רשימת החברים הראשונית
     fetchFriends();
 
-    // מאזין לצפצוף בזמן אמת מרגע זה
-    const unsubscribe = subscribeToFriendSync(userId, () => {
-      fetchFriends(); // רענון הרשימה כשיש שינוי
+    const unsubscribeSync = subscribeToFriendSync(userId, () => {
+      fetchFriends();
     });
 
-    // ניקוי מאזין ביציאה מהעמוד
-    return () => unsubscribe();
+    return () => unsubscribeSync();
   }, [userId]);
 
+  useEffect(() => {
+    if (!userId || friends.length === 0) return;
+
+    const unsubscribes = friends.map((friend) =>
+      subscribeToChatMeta(userId, friend.UserID, (hasNew) => {
+        setUnreadMessages((prev) => ({
+          ...prev,
+          [friend.UserID]: hasNew
+        }));
+      })
+    );
+
+    return () => unsubscribes.forEach((unsub) => unsub());
+  }, [friends, userId]);
 
   const fetchFriends = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch friends list");
+      if (!res.ok) throw new Error("שגיאה בטעינת רשימת החברים.");
 
       const data = await res.json();
-      console.log("✅ Friends fetched:", data);
+      console.log("✅ חברים נטענו:", data);
       setFriends(data);
     } catch (err) {
-      console.error("❌ Error fetching friends:", err);
-      setError("Failed to load friends list.");
+      console.error("❌ שגיאה בטעינת חברים:", err);
+      setError("שגיאה בטעינת רשימת החברים.");
     }
   };
 
@@ -54,29 +69,41 @@ const FriendsList = () => {
           friendID: friendID
         })
       });
-  
+
       const data = await res.json();
-      console.log("🧹 Friend removed:", data);
-  
+      console.log("חבר הוסר:", data);
+
       if (res.ok) {
-        await notifyFriendSync(userId);     // רענון עצמי
-        await notifyFriendSync(friendID);   // רענון אצל החבר
+        await notifyFriendSync(userId);
+        await notifyFriendSync(friendID);
       }
-  
-      fetchFriends(); // רענון מיידי מקומי
+
+      fetchFriends();
     } catch (error) {
-      console.error("❌ Error removing friend:", error);
+      console.error("❌ שגיאה בהסרת חבר:", error);
     }
   };
-  
+
+  const toggleChat = (friendID) => {
+    setOpenChats((prev) =>
+      prev.includes(friendID)
+        ? prev.filter((id) => id !== friendID)
+        : [...prev, friendID]
+    );
+
+    setUnreadMessages((prev) => ({
+      ...prev,
+      [friendID]: false
+    }));
+  };
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-2">Your Friends</h2>
+    <div className="mb-8" dir="rtl">
+      <h2 className="text-xl font-semibold mb-2">החברים שלך</h2>
       {error && <p className="text-red-500">{error}</p>}
 
       {friends.length === 0 ? (
-        <p className="text-gray-600">You have no friends yet.</p>
+        <p className="text-gray-600">אין לך חברים כרגע.</p>
       ) : (
         <ul className="space-y-2">
           {friends.map((friend) => (
@@ -87,14 +114,40 @@ const FriendsList = () => {
               <div>
                 <p className="font-semibold">{friend.Username}</p>
                 <p className="text-sm text-gray-600">{friend.Email}</p>
-                <p className="text-sm text-gray-400">Since: {friend.FriendshipDate}</p>
+                <p className="text-sm text-gray-400">
+                  חבר מאז: {friend.FriendshipDate}
+                </p>
               </div>
-              <button
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                onClick={() => handleRemoveFriend(friend.UserID)}
-              >
-                Remove
-              </button>
+              <div className="space-x-2 relative">
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 relative"
+                  onClick={() => toggleChat(friend.UserID)}
+                >
+                  הודעה
+                  {unreadMessages[friend.UserID] && (
+                    <span className="absolute top-0 right-0 mt-[-6px] mr-[-6px] w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                  )}
+                </button>
+                <button
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  onClick={() => handleRemoveFriend(friend.UserID)}
+                >
+                  הסר חבר
+                </button>
+              </div>
+
+              {openChats.includes(friend.UserID) && (
+                <ChatWindow
+                  currentUserId={userId}
+                  friendId={friend.UserID}
+                  friendName={friend.Username}
+                  onClose={() =>
+                    setOpenChats((prev) =>
+                      prev.filter((id) => id !== friend.UserID)
+                    )
+                  }
+                />
+              )}
             </li>
           ))}
         </ul>

@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../../../firebaseConfig";
-import { subscribeToFriendSync } from "../../services/firebaseService";
-import { notifyFriendSync } from "../../services/firebaseService";
+import { subscribeToFriendSync, notifyFriendSync } from "../../services/firebaseService";
 import { remove, ref } from "firebase/database";
 import { db } from "../../../firebaseConfig";
-
-
-
+import { subscribeToReceivedFriendRequests } from "../../services/firebaseService";
 
 const FriendsPendingRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -18,39 +15,46 @@ const FriendsPendingRequests = () => {
 
   useEffect(() => {
     if (!userId) return;
-
-    const unsubscribe = subscribeToFriendSync(userId, () => {
+  
+    const unsubscribeSync = subscribeToFriendSync(userId, () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     });
-
-    return () => unsubscribe();
+  
+    const unsubscribeRealtimeReceived = subscribeToReceivedFriendRequests(userId, () => {
+      fetchReceivedRequests();
+    });
+  
+    return () => {
+      unsubscribeSync();
+      unsubscribeRealtimeReceived();
+    };
   }, [userId]);
+  
 
   const fetchPendingRequests = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/pending-sent/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch sent requests");
+      if (!res.ok) throw new Error("שגיאה בטעינת הבקשות שנשלחו.");
       const data = await res.json();
       setPendingRequests(data);
     } catch (err) {
-      console.error("❌ Error fetching sent requests:", err);
-      setError("Failed to load sent friend requests.");
+      console.error("שגיאה:", err);
+      setError("שגיאה בטעינת בקשות שנשלחו.");
     }
   };
 
   const fetchReceivedRequests = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/pending-received/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch received requests");
+      if (!res.ok) throw new Error("שגיאה בטעינת הבקשות שהתקבלו.");
       const data = await res.json();
       setReceivedRequests(data);
     } catch (err) {
-      console.error("❌ Error fetching received requests:", err);
-      setError("Failed to load received friend requests.");
+      console.error("שגיאה:", err);
+      setError("שגיאה בטעינת בקשות שהתקבלו.");
     }
   };
-
 
   const handleAcceptRequest = async (senderID, receiverID) => {
     try {
@@ -63,7 +67,7 @@ const FriendsPendingRequests = () => {
       });
 
       const data = await res.json();
-      console.log("✅ Accept response:", data);
+      console.log("בקשה אושרה:", data);
 
       if (res.ok) {
         await notifyFriendSync(senderID);
@@ -73,9 +77,9 @@ const FriendsPendingRequests = () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
-      console.error("❌ Error accepting friend request:", error);
+      console.error("שגיאה באישור בקשה:", error);
     }
-    // הסרת רשומת המעקב
+
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
   };
 
@@ -90,7 +94,7 @@ const FriendsPendingRequests = () => {
       });
 
       const data = await res.json();
-      console.log("✅ Status updated:", data);
+      console.log("סטטוס עודכן:", data);
 
       if (res.ok) {
         await notifyFriendSync(senderID);
@@ -100,24 +104,23 @@ const FriendsPendingRequests = () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
-      console.error("❌ Error updating request status:", error);
+      console.error("שגיאה בעדכון סטטוס:", error);
     }
-    // הסרת רשומת המעקב
+
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
   };
 
-
   return (
-    <div className="mb-8">
+    <div className="mb-8" dir="rtl">
       {error && <p className="text-red-500">{error}</p>}
       {!userId ? (
-        <p className="text-gray-500">You must be logged in to view friend requests.</p>
+        <p className="text-gray-500">עליך להיות מחובר כדי לצפות בבקשות החברות.</p>
       ) : (
         <>
-          {/* 🔹 Sent Requests */}
-          <h2 className="text-xl font-semibold mb-2">Sent Friend Requests</h2>
+          {/* 🔹 בקשות שנשלחו */}
+          <h2 className="text-xl font-semibold mb-2">בקשות חברות שנשלחו</h2>
           {pendingRequests.length === 0 ? (
-            <p className="text-gray-600 mb-4">You haven't sent any friend requests.</p>
+            <p className="text-gray-600 mb-4">לא שלחת עדיין בקשות חברות.</p>
           ) : (
             <ul className="space-y-2 mb-6">
               {pendingRequests.map((user) => (
@@ -130,17 +133,17 @@ const FriendsPendingRequests = () => {
                     className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                     onClick={() => updateRequestStatus(userId, user.userID, "cancel")}
                   >
-                    Cancel Request
+                    ביטול
                   </button>
                 </li>
               ))}
             </ul>
           )}
 
-          {/* 🔹 Received Requests */}
-          <h2 className="text-xl font-semibold mb-2">Received Friend Requests</h2>
+          {/* 🔹 בקשות שהתקבלו */}
+          <h2 className="text-xl font-semibold mb-2">בקשות חברות שהתקבלו</h2>
           {receivedRequests.length === 0 ? (
-            <p className="text-gray-600">You have no incoming friend requests.</p>
+            <p className="text-gray-600">אין לך בקשות חדשות.</p>
           ) : (
             <ul className="space-y-2">
               {receivedRequests.map((user) => (
@@ -154,13 +157,13 @@ const FriendsPendingRequests = () => {
                       className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                       onClick={() => handleAcceptRequest(user.userID, userId)}
                     >
-                      Accept
+                      אישור
                     </button>
                     <button
                       className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       onClick={() => updateRequestStatus(user.userID, userId, "decline")}
                     >
-                      Decline
+                      דחייה
                     </button>
                   </div>
                 </li>
@@ -171,7 +174,6 @@ const FriendsPendingRequests = () => {
       )}
     </div>
   );
-
 };
 
 export default FriendsPendingRequests;

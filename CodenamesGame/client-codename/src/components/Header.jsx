@@ -4,29 +4,41 @@ import { useAuth } from "../context/AuthContext";
 import LogoutButton from "./LogoutButton";
 import { ref, onValue } from "firebase/database";
 import { db } from "../../firebaseConfig";
+import { subscribeToFriendRequestAlerts, clearFriendRequestAlert } from "../services/firebaseService";
 
 const Header = () => {
   const { user } = useAuth();
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
-  const [lastAlertFriend, setLastAlertFriend] = useState(null);
+  const [hasFriendRequestAlert, setHasFriendRequestAlert] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
   useEffect(() => {
     if (!user?.uid) return;
 
+    // הודעות שלא נקראו
     const unreadRef = ref(db, `unreadMessages/${user.uid}`);
-    const unsubscribe = onValue(unreadRef, (snapshot) => {
+    const unsubscribeMessages = onValue(unreadRef, (snapshot) => {
       const data = snapshot.val() || {};
       const hasUnread = Object.values(data).some((v) => v === true);
-      const newAlert = Object.entries(data).find(([_, v]) => v === true)?.[0];
-
       setHasUnreadMessages(hasUnread);
-      if (newAlert) {
-        setLastAlertFriend(newAlert);
-        setTimeout(() => setLastAlertFriend(null), 5000);
+    });
+
+    // בקשת חברות חדשה
+    const unsubscribeFriendAlert = subscribeToFriendRequestAlerts(user.uid, (hasAlert) => {
+      setHasFriendRequestAlert(hasAlert);
+      if (hasAlert) {
+        setPopupMessage("קיבלת בקשת חברות חדשה!");
+        setTimeout(() => {
+          setPopupMessage("");
+          clearFriendRequestAlert(user.uid);
+        }, 5000);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeMessages();
+      unsubscribeFriendAlert();
+    };
   }, [user?.uid]);
 
   return (
@@ -40,7 +52,7 @@ const Header = () => {
 
         <Link to="/friends" className="relative px-4 py-2 rounded-lg hover:bg-gray-700 transition">
           חברים
-          {hasUnreadMessages && (
+          {(hasUnreadMessages || hasFriendRequestAlert) && (
             <span className="absolute top-1 left-0 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
           )}
         </Link>
@@ -62,9 +74,9 @@ const Header = () => {
         </Link>
       )}
 
-      {lastAlertFriend && (
+      {popupMessage && (
         <div className="fixed top-4 right-4 z-50 bg-blue-500 text-white px-6 py-3 rounded shadow-lg animate-bounce">
-          📩 הודעה חדשה מחבר!
+          {popupMessage}
         </div>
       )}
     </header>

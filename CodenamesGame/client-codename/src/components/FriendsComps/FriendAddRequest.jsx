@@ -49,10 +49,13 @@ const FriendAddRequest = ({ receiverUser }) => {
       if (res.ok) {
         setMessage("הבקשה נשלחה בהצלחה.");
 
-        // שמירת סטטוס ל־Firebase
+        // סטטוס לפיירבייס
         await set(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`), "Pending");
 
-        // עדכון בזמן אמת
+        // סימון בקשת חברות כהתראה למקבל
+        await set(ref(db, `friendRequestAlerts/${receiverID}`), true);
+
+        // טריגר סינכרון לחברים
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
       } else {

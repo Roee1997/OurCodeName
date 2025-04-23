@@ -13,24 +13,32 @@ const Friends = () => {
       {/* 🔝 כותרת עליונה */}
       <Header />
 
-      {/* 🖼️ רקע עם שקיפות */}
+      {/* 🖼️ רקע */}
       <BackgroundImage image={codenamesImage} />
 
-      {/* 📦 תוכן העמוד (RTL רק כאן) */}
+      {/* 📦 תוכן עמוד חברים */}
       <div className="relative z-10 container mx-auto p-6 text-white" dir="rtl">
-        <h1 className="text-3xl font-bold mb-4">רשימת החברים</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-white drop-shadow">
+          ניהול חברים
+        </h1>
 
-        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow text-black">
+        {/* 🔍 חיפוש שחקנים */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">חיפוש שחקנים</h2>
           <FriendSearch />
-        </section>
+        </div>
 
-        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow text-black">
+        {/* ⏳ בקשות ממתינות */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">בקשות חברים ממתינות</h2>
           <FriendsPendingRequests />
-        </section>
+        </div>
 
-        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow text-black">
+        {/* 🧑‍🤝‍🧑 רשימת חברים */}
+        <div className="mb-8 bg-white bg-opacity-90 p-6 rounded-lg shadow text-black">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">רשימת חברים קיימים</h2>
           <FriendsList />
-        </section>
+        </div>
       </div>
 
       {/* ⚓ פוטר */}

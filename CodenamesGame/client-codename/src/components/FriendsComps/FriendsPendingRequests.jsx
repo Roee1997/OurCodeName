@@ -3,6 +3,7 @@ import { auth } from "../../../firebaseConfig";
 import { subscribeToFriendSync, notifyFriendSync } from "../../services/firebaseService";
 import { remove, ref } from "firebase/database";
 import { db } from "../../../firebaseConfig";
+import { subscribeToReceivedFriendRequests } from "../../services/firebaseService";
 
 const FriendsPendingRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -14,14 +15,22 @@ const FriendsPendingRequests = () => {
 
   useEffect(() => {
     if (!userId) return;
-
-    const unsubscribe = subscribeToFriendSync(userId, () => {
+  
+    const unsubscribeSync = subscribeToFriendSync(userId, () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     });
-
-    return () => unsubscribe();
+  
+    const unsubscribeRealtimeReceived = subscribeToReceivedFriendRequests(userId, () => {
+      fetchReceivedRequests();
+    });
+  
+    return () => {
+      unsubscribeSync();
+      unsubscribeRealtimeReceived();
+    };
   }, [userId]);
+  
 
   const fetchPendingRequests = async () => {
     try {

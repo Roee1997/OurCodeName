@@ -160,6 +160,45 @@ export const subscribeToChatMeta = (currentUserId, friendId, callback) => {
   });
 };
 
+
+// ✅ 🔔 שליחת התראה על בקשת חברות חדשה
+export const notifyFriendRequestAlert = (receiverId) => {
+  const alertRef = ref(db, `friendRequestAlerts/${receiverId}`);
+  return set(alertRef, true);
+};
+
+// ✅ האזנה להתראות על בקשת חברות
+export const subscribeToFriendRequestAlerts = (userId, callback) => {
+  const alertRef = ref(db, `friendRequestAlerts/${userId}`);
+  return onValue(alertRef, (snapshot) => {
+    const hasAlert = snapshot.exists();
+    callback(hasAlert);
+  });
+};
+
+// אופציונלי – לנקות התראה לאחר שהוצגה
+export const clearFriendRequestAlert = (userId) => {
+  const alertRef = ref(db, `friendRequestAlerts/${userId}`);
+  return remove(alertRef);
+};
+
+export const subscribeToReceivedFriendRequests = (userId, callback) => {
+  const refPath = ref(db, `friendRequestsStatus`);
+  return onValue(refPath, (snapshot) => {
+    const allStatuses = snapshot.val() || {};
+    const received = Object.entries(allStatuses)
+      .flatMap(([senderId, receivers]) =>
+        Object.entries(receivers).filter(
+          ([receiverId, status]) =>
+            receiverId === userId && status === "Pending"
+        ).map(([receiverId, status]) => ({ senderId, receiverId, status }))
+      );
+    if (received.length > 0) {
+      callback(); // ניתן גם להעביר את הרשימה אם צריך
+    }
+  });
+};
+
 //FRIENDS SECTION////////////////////////////////////////////////////
 
 

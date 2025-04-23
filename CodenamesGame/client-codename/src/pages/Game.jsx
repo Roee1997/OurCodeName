@@ -14,6 +14,11 @@ import {
   subscribeToWinner,
 } from "../services/firebaseService";
 
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import BackgroundImage from "../components/BackgroundImage";
+import codenamesImage from "../assets/codename.webp";
+
 const Game = () => {
   const { gameId } = useParams();
   const { user, loading } = useAuth();
@@ -67,7 +72,7 @@ const Game = () => {
 
           if (countdown === 0) {
             clearInterval(interval);
-            await setGameEnded(gameId); // 🔁 כל המשתמשים מאזינים
+            await setGameEnded(gameId);
           }
         }, 1000);
       }
@@ -76,65 +81,73 @@ const Game = () => {
     return () => unsubscribe();
   }, [gameId]);
 
-  // האזנה למעבר לובי
   useEffect(() => {
     if (!gameId) return;
     const unsubscribe = subscribeToGameEnded(gameId, (ended) => {
-      if (ended) {
-        navigate("/lobby");
-      }
+      if (ended) navigate("/lobby");
     });
     return () => unsubscribe();
   }, [gameId]);
 
-  if (loading) return <p>טוען...</p>;
-  if (!user) return <p>אין גישה</p>;
+  if (loading) return <p className="text-center text-white mt-20">⏳ טוען משתמש...</p>;
+  if (!user) return <p className="text-center text-red-500 mt-20">😢 אין גישה</p>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 text-center">🎮 משחק שם קוד – חדר #{gameId}</h1>
+    <div className="relative min-h-screen flex flex-col">
+      <Header />
+      <BackgroundImage image={codenamesImage} />
 
-      {currentTurn && (
-        <div className="text-center text-xl font-semibold mb-4">
-          🎯 תור הקבוצה {currentTurn === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
-        </div>
-      )}
+      <main className="relative z-10 container mx-auto p-6 text-white" dir="rtl">
+        <section className="bg-white bg-opacity-90 p-6 rounded shadow text-black">
+          <h1 className="text-3xl font-bold text-center mb-4">
+            🎮 משחק שם קוד – חדר #{gameId}
+          </h1>
 
-      {winner && (
-        <div className="text-center text-2xl font-bold bg-white p-4 rounded shadow-lg text-green-700 mb-4">
-          {winner === "Red" && "🏆 הקבוצה האדומה ניצחה!"}
-          {winner === "Blue" && "🏆 הקבוצה הכחולה ניצחה!"}
-          {winner === "RedLost" && "💀 הקבוצה האדומה הפסידה – נלחץ מתנקש!"}
-          {winner === "BlueLost" && "💀 הקבוצה הכחולה הפסידה – נלחץ מתנקש!"}
-          {redirectCountdown !== null && (
-            <div className="text-sm text-gray-600 mt-2">
-              מעבר ללובי בעוד {redirectCountdown} שניות...
+          {currentTurn && (
+            <div className="text-center text-xl font-semibold mb-4">
+              🎯 תור הקבוצה {currentTurn === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
             </div>
           )}
-        </div>
-      )}
 
-      <div className="flex gap-6">
-        <div className="flex-1">
-          <Board
-            gameId={gameId}
-            user={user}
-            team={team}
-            isSpymaster={isSpymaster}
-            currentTurn={currentTurn}
-            winner={winner}
-          />
-          {isSpymaster && team && (
-            <div className="mt-4">
-              <CluePanel gameId={gameId} team={team} currentTurn={currentTurn} />
+          {winner && (
+            <div className="text-center text-2xl font-bold bg-green-100 text-green-700 p-4 rounded mb-4 shadow">
+              {winner === "Red" && "🏆 הקבוצה האדומה ניצחה!"}
+              {winner === "Blue" && "🏆 הקבוצה הכחולה ניצחה!"}
+              {winner === "RedLost" && "💀 הקבוצה האדומה הפסידה – נלחץ מתנקש!"}
+              {winner === "BlueLost" && "💀 הקבוצה הכחולה הפסידה – נלחץ מתנקש!"}
+              {redirectCountdown !== null && (
+                <div className="text-sm text-gray-600 mt-2">
+                  מעבר ללובי בעוד {redirectCountdown} שניות...
+                </div>
+              )}
             </div>
           )}
-        </div>
 
-        <div className="w-64">
-          <ClueChat clues={clues} />
-        </div>
-      </div>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 lg:pr-6">
+              <Board
+                gameId={gameId}
+                user={user}
+                team={team}
+                isSpymaster={isSpymaster}
+                currentTurn={currentTurn}
+                winner={winner}
+              />
+              {isSpymaster && team && (
+                <div className="mt-4">
+                  <CluePanel gameId={gameId} team={team} currentTurn={currentTurn} />
+                </div>
+              )}
+            </div>
+
+            <div className="w-full lg:w-[20rem] xl:w-[24rem] lg:pl-4">
+              <ClueChat clues={clues} />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer className="mt-auto" />
     </div>
   );
 };

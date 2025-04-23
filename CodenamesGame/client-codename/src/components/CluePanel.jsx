@@ -49,7 +49,7 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
       className="p-4 bg-gray-100 rounded shadow-md text-center"
       style={{ maxWidth: "450px", margin: "0 auto" }} // ⬅️ צר יותר
     >
-      <h3 className="font-bold mb-2">
+      <h3 className="text-gray-600 font-bold mb-2">
         🕵️ תן רמז לקבוצה {team === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
       </h3>
       <div className="flex justify-center gap-2">

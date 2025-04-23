@@ -1,17 +1,16 @@
-// src/components/ClueChat.jsx
 import React from "react";
 
 const ClueChat = ({ clues }) => {
   return (
     <div
-    className="rounded shadow-inner text-right bg-white"
-    style={{
-      height: "100%",
-      padding: "1rem",
-      overflowY: "auto",
-      border: "1px solid #ddd",
-      minWidth: "20rem", // ⬅️ היה 16rem → עכשיו 20rem
-      maxWidth: "24rem"  // גבול עליון שלא יתפוצץ
+      className="rounded shadow-inner text-right bg-white"
+      style={{
+        height: "100%",
+        padding: "1rem",
+        overflowY: "auto",
+        border: "1px solid #ddd",
+        minWidth: "20rem",
+        maxWidth: "24rem"
       }}
     >
       <h3 className="text-lg font-bold mb-2">💬 רמזים</h3>

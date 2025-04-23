@@ -1,8 +1,7 @@
 import { onValue, ref, set } from "firebase/database"; // נוודא שהשירות הזה קיים
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { db } from "../../firebaseConfig"; // נוודא שהשירות הזה קיים
+import { db } from "../../firebaseConfig"; // נוודא  הזה קיים
 import { useAuth } from "../context/AuthContext";
 import { saveBoardToFirebase, savePlayerToLobby, setTurn, subscribeToLobbyPlayers } from "../services/firebaseService";
 

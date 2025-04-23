@@ -6,9 +6,11 @@ import neutralImg from "../assets/neutral.jpeg";
 import redTeamImg from "../assets/redteam.jpeg";
 import "../css/Card.css";
 
+// קומפוננטת Card – מציגה קלף יחיד במשחק שם קוד
 const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, isSpymaster }) => {
   const { word, team, isRevealed, cardID } = card;
 
+  // מחזיר את תמונת הרקע המתאימה לפי סוג הקלף
   const getCardImage = () => {
     switch (team) {
       case "Red": return redTeamImg;
@@ -19,6 +21,7 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
     }
   };
 
+  // טיפול בלחיצה על קלף – מאשר רק אם סוכן בתורו
   const handleClick = () => {
     if (!canClick || isRevealed) return;
 
@@ -27,12 +30,13 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
       return;
     }
 
-    // ✅ רק מפעיל את פונקציית ההורה (Board)
+    // מפעיל את הפונקציה מה־Board לחשיפת קלף
     if (onCardRevealed) onCardRevealed(card);
   };
 
   const cardImage = getCardImage();
 
+  // קובע את סגנון הקלף – צבע/תמונה לפי מצב ותפקיד
   const cardStyle = isRevealed
     ? {
         backgroundImage: `url(${cardImage})`,
@@ -51,9 +55,10 @@ const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, i
             : "#eeeeee",
       }
     : {
-        backgroundColor: "#eeeeee", // סוכן רואה הכל אפור לפני גילוי
+        backgroundColor: "#eeeeee", // הסוכן רואה צבע אחיד לפני גילוי
       };
 
+  // מציג את הקלף עם אנימציית flip בעת גילוי
   return (
     <motion.div
       onClick={handleClick}

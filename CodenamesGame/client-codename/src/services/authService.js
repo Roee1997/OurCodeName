@@ -1,37 +1,37 @@
-import { auth } from "../../firebaseConfig";
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
   deleteUser,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  updateProfile
 } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
-const API_BASE_URL = "http://localhost:5150/api/users"; // ✅ Adjust if needed
+const API_BASE_URL = "http://localhost:5150/api/users"; // כתובת ה־API של צד השרת
 
-// 🔹 Register User (Check Username, Register in Firebase, Update displayName, Register in SQL)
+// רושם משתמש חדש: בודק כינוי, יוצר ב־Firebase, שומר במסד הנתונים
 export async function registerUser(username, email, password) {
   try {
-    // 🔹 Step 1: Check if the Username is available in SQL Server
+    // בדיקת זמינות כינוי במסד הנתונים
     const usernameCheckResponse = await fetch(`${API_BASE_URL}/check-username/${username}`);
 
     if (!usernameCheckResponse.ok) {
       const errorData = await usernameCheckResponse.json();
-      throw new Error(errorData.message || "⚠️ הכינוי כבר תפוס, בחר כינוי אחר.");
+      throw new Error(errorData.message || "הכינוי כבר תפוס, בחר כינוי אחר.");
     }
 
-    // 🔹 Step 2: Register the user in Firebase
+    // יצירת משתמש ב־Firebase
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log("✅ Firebase user created:", user.uid);
+    console.log("משתמש נוצר ב־Firebase:", user.uid);
 
-    // ✅ Step 3: Update display name in Firebase
+    // עדכון שם תצוגה של המשתמש
     await updateProfile(user, {
       displayName: username
     });
-    console.log("✅ Display name set to:", username);
+    console.log("שם תצוגה עודכן:", username);
 
-    // 🔹 Step 4: Send user data to SQL Server
+    // רישום המשתמש במסד הנתונים של SQL Server
     const response = await fetch(`${API_BASE_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,51 +45,53 @@ export async function registerUser(username, email, password) {
     if (!response.ok) {
       const errorData = await response.json();
 
-      // 🔥 Step 5: If SQL registration fails, delete the Firebase user
+      // אם השמירה ב־SQL נכשלה – מוחק את המשתמש מ־Firebase
       await deleteUser(user);
-      throw new Error(errorData.message || "❌ Failed to register user in SQL Server.");
+      throw new Error(errorData.message || "נכשלה הרשמת המשתמש במסד הנתונים.");
     }
 
-    console.log("✅ User registered in SQL Server!");
+    console.log("המשתמש נשמר במסד הנתונים.");
     return user;
 
   } catch (error) {
-    console.error("❌ Registration error:", error.message);
+    console.error("שגיאה בהרשמה:", error.message);
 
-    // 🔥 Step 6: If Firebase created the user but SQL failed, delete the user
+    // אם נוצר משתמש ב־Firebase אך SQL נכשלה – מוחק את המשתמש
     if (auth.currentUser) {
       await deleteUser(auth.currentUser);
-      console.log("🔥 Firebase user deleted due to SQL error.");
+      console.log("המשתמש נמחק מ־Firebase עקב שגיאת שרת.");
     }
 
-    // 🔹 Handle Firebase "Email Already in Use" Error
+    // טיפול במקרה של אימייל קיים
     if (error.code === "auth/email-already-in-use") {
-      throw new Error("⚠️ האימייל כבר קיים במערכת. נסה להתחבר.");
+      throw new Error("האימייל כבר קיים במערכת. נסה להתחבר.");
     }
 
+    // טיפול במקרה של כינוי כפול
     if (error.message.includes("כינוי כבר קיים")) {
-      throw new Error("⚠️ הכינוי כבר קיים במערכת. נסה כינוי אחר.");
+      throw new Error("הכינוי כבר קיים במערכת. נסה כינוי אחר.");
     }
 
     throw error;
   }
 }
-// 🔹 Login User
+
+// מבצע התחברות של המשתמש עם אימייל וסיסמה
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error("Firebase auth error:", error);
+    console.error("שגיאת התחברות Firebase:", error);
     throw error;
   }
 };
 
-// 🔹 Logout User
+// מנתק את המשתמש מהמערכת
 export const logoutUser = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    console.error("Error logging out:", error);
+    console.error("שגיאה ביציאה:", error);
   }
 };

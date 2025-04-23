@@ -27,7 +27,7 @@ const FriendAddRequest = ({ receiverUser }) => {
 
   const handleSendRequest = async () => {
     if (!currentUser || !receiverUser?.userID) {
-      setMessage("❌ שגיאה: המשתמש אינו תקף.");
+      setMessage("שגיאה: המשתמש אינו תקף.");
       return;
     }
 
@@ -47,7 +47,7 @@ const FriendAddRequest = ({ receiverUser }) => {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ בקשה נשלחה בהצלחה");
+        setMessage("הבקשה נשלחה בהצלחה.");
 
         // שמירת סטטוס ל־Firebase
         await set(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`), "Pending");
@@ -56,11 +56,11 @@ const FriendAddRequest = ({ receiverUser }) => {
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
       } else {
-        setMessage("❌ " + (data.message || "שליחת הבקשה נכשלה."));
+        setMessage(data.message || "שליחת הבקשה נכשלה.");
       }
     } catch (error) {
       console.error("שגיאה בבקשה:", error);
-      setMessage("❌ אירעה שגיאה בעת שליחת בקשת החברות.");
+      setMessage("אירעה שגיאה בעת שליחת בקשת החברות.");
     }
   };
 
@@ -74,7 +74,7 @@ const FriendAddRequest = ({ receiverUser }) => {
       >
         שלח בקשת חברות
       </button>
-      {message && <p className="mt-2 text-sm">{message}</p>}
+      {message && <p className="mt-2 text-sm text-right">{message}</p>}
     </div>
   );
 };

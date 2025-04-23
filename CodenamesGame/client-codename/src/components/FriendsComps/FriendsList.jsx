@@ -46,7 +46,7 @@ const FriendsList = () => {
   const fetchFriends = async () => {
     try {
       const res = await fetch(`http://localhost:5150/api/friends/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch friends list");
+      if (!res.ok) throw new Error("שגיאה בטעינת רשימת החברים.");
 
       const data = await res.json();
       console.log("✅ חברים נטענו:", data);
@@ -71,7 +71,7 @@ const FriendsList = () => {
       });
 
       const data = await res.json();
-      console.log("🧹 חבר הוסר:", data);
+      console.log("חבר הוסר:", data);
 
       if (res.ok) {
         await notifyFriendSync(userId);
@@ -91,7 +91,6 @@ const FriendsList = () => {
         : [...prev, friendID]
     );
 
-    // ניקוי התראה כשהצ'אט נפתח
     setUnreadMessages((prev) => ({
       ...prev,
       [friendID]: false

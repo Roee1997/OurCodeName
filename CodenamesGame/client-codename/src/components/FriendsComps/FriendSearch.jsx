@@ -10,7 +10,7 @@ const FriendSearch = () => {
     setErrorMessage("");
     setSearchResult(null);
 
-    console.log("🔍 נשלחה בקשת חיפוש לשרת:", searchTerm);
+    console.log("נשלחה בקשת חיפוש לשרת:", searchTerm);
     const endpoint = `http://localhost:5150/api/friends/search?query=${searchTerm.trim()}`;
 
     try {
@@ -18,10 +18,10 @@ const FriendSearch = () => {
       if (!res.ok) throw new Error("User not found");
 
       const user = await res.json();
-      console.log("✅ משתמש נמצא:", user);
+      console.log("משתמש נמצא:", user);
       setSearchResult(user);
     } catch (error) {
-      console.error("❌ שגיאה בחיפוש:", error.message);
+      console.error("שגיאה בחיפוש:", error.message);
       setErrorMessage("המשתמש לא נמצא.");
     }
   };

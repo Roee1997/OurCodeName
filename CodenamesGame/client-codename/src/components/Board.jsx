@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import "../css/Board.css";
 import {
   setTurn,
+  setWinner,
   subscribeToBoard,
   subscribeToLastClue,
-  updateCardInFirebase, // ✅ ייבוא לפיירבייס
+  updateCardInFirebase,
 } from "../services/firebaseService";
 import Card from "./Card";
 
-const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
+const Board = ({ gameId, user, team, isSpymaster, currentTurn, winner }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [guessCount, setGuessCount] = useState(0);
@@ -49,10 +50,9 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
 
   const handleCardClick = async (card) => {
     const foundCard = cards.find((c) => c.cardID === card.cardID);
-    if (!foundCard || foundCard.isRevealed) return;
+    if (!foundCard || foundCard.isRevealed || winner) return;
 
     if (team !== currentTurn || isSpymaster) return;
-
     if (!lastClue || lastClue.team !== currentTurn) {
       console.warn("⛔ לא נשלח רמז – הסוכן לא יכול לנחש");
       return;
@@ -67,7 +67,6 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
       return;
     }
 
-    // ✅ עדכון ל־Firebase → כדי שכל השחקנים יראו את הקלף נחשף
     await updateCardInFirebase(gameId, {
       ...foundCard,
       isRevealed: true
@@ -81,26 +80,37 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
     const maxGuesses = lastClue?.number ?? 0;
     const cardTeam = foundCard.team?.trim();
     const isAssassin = cardTeam === "Assassin";
-    const isNeutral = cardTeam === "Neutral";
     const isOwnTeam = cardTeam === currentTurn;
     const isOpponent = (cardTeam === "Red" || cardTeam === "Blue") && !isOwnTeam;
 
+    // 💀 הפסד אוטומטי על מתנקש
     if (isAssassin) {
-      console.log("💀 קלף מתנקש – מעביר תור מייד");
-      const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
-      await setTurn(gameId, nextTeam);
+      const losingTeam = currentTurn === "Red" ? "RedLost" : "BlueLost";
+      await setWinner(gameId, losingTeam);
+      return;
+    }
+
+    // 🧮 בדיקת ניצחון לפי קלפים
+    const redRevealed = cards.filter(c => c.isRevealed && c.team === "Red").length + (cardTeam === "Red" ? 1 : 0);
+    const blueRevealed = cards.filter(c => c.isRevealed && c.team === "Blue").length + (cardTeam === "Blue" ? 1 : 0);
+
+    if (redRevealed === 8) {
+      await setWinner(gameId, "Red");
+      return;
+    }
+
+    if (blueRevealed === 8) {
+      await setWinner(gameId, "Blue");
       return;
     }
 
     if (isOpponent) {
-      console.log("❌ קלף של היריב – מעביר תור מייד");
       const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
       await setTurn(gameId, nextTeam);
       return;
     }
 
     if (newGuessCount >= maxGuesses) {
-      console.log("✅ מוצו הניחושים – מעביר תור");
       const nextTeam = currentTurn === "Red" ? "Blue" : "Red";
       await setTurn(gameId, nextTeam);
       return;
@@ -119,7 +129,7 @@ const Board = ({ gameId, user, team, isSpymaster, currentTurn }) => {
           key={card.cardID}
           card={card}
           gameId={gameId}
-          canClick={!card.isRevealed}
+          canClick={!card.isRevealed && !winner} // ❌ חוסם קליקים אחרי סיום
           onCardRevealed={handleCardClick}
           currentTurn={currentTurn}
           userTeam={team}

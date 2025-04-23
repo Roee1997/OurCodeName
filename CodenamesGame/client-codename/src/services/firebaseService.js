@@ -94,3 +94,15 @@ export const subscribeToLastClue = (gameId, callback) => {
     callback(clue);
   });
 };
+
+export const setWinner = (gameId, winner) => {
+  const refWinner = ref(db, `games/${gameId}/winner`);
+  return set(refWinner, winner);
+};
+
+export const subscribeToWinner = (gameId, callback) => {
+  const refWinner = ref(db, `games/${gameId}/winner`);
+  return onValue(refWinner, (snapshot) => {
+    callback(snapshot.val());
+  });
+};

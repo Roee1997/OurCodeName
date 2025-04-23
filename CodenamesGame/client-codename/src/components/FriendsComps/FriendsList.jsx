@@ -49,11 +49,11 @@ const FriendsList = () => {
       if (!res.ok) throw new Error("Failed to fetch friends list");
 
       const data = await res.json();
-      console.log("✅ Friends fetched:", data);
+      console.log("✅ חברים נטענו:", data);
       setFriends(data);
     } catch (err) {
-      console.error("❌ Error fetching friends:", err);
-      setError("Failed to load friends list.");
+      console.error("❌ שגיאה בטעינת חברים:", err);
+      setError("שגיאה בטעינת רשימת החברים.");
     }
   };
 
@@ -71,7 +71,7 @@ const FriendsList = () => {
       });
 
       const data = await res.json();
-      console.log("🧹 Friend removed:", data);
+      console.log("🧹 חבר הוסר:", data);
 
       if (res.ok) {
         await notifyFriendSync(userId);
@@ -80,7 +80,7 @@ const FriendsList = () => {
 
       fetchFriends();
     } catch (error) {
-      console.error("❌ Error removing friend:", error);
+      console.error("❌ שגיאה בהסרת חבר:", error);
     }
   };
 
@@ -91,7 +91,7 @@ const FriendsList = () => {
         : [...prev, friendID]
     );
 
-    // clear unread indicator when opening
+    // ניקוי התראה כשהצ'אט נפתח
     setUnreadMessages((prev) => ({
       ...prev,
       [friendID]: false
@@ -99,12 +99,12 @@ const FriendsList = () => {
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-2">Your Friends</h2>
+    <div className="mb-8" dir="rtl">
+      <h2 className="text-xl font-semibold mb-2">החברים שלך</h2>
       {error && <p className="text-red-500">{error}</p>}
 
       {friends.length === 0 ? (
-        <p className="text-gray-600">You have no friends yet.</p>
+        <p className="text-gray-600">אין לך חברים כרגע.</p>
       ) : (
         <ul className="space-y-2">
           {friends.map((friend) => (
@@ -116,7 +116,7 @@ const FriendsList = () => {
                 <p className="font-semibold">{friend.Username}</p>
                 <p className="text-sm text-gray-600">{friend.Email}</p>
                 <p className="text-sm text-gray-400">
-                  Since: {friend.FriendshipDate}
+                  חבר מאז: {friend.FriendshipDate}
                 </p>
               </div>
               <div className="space-x-2 relative">
@@ -124,7 +124,7 @@ const FriendsList = () => {
                   className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 relative"
                   onClick={() => toggleChat(friend.UserID)}
                 >
-                  Message
+                  הודעה
                   {unreadMessages[friend.UserID] && (
                     <span className="absolute top-0 right-0 mt-[-6px] mr-[-6px] w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
                   )}
@@ -133,7 +133,7 @@ const FriendsList = () => {
                   className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   onClick={() => handleRemoveFriend(friend.UserID)}
                 >
-                  Remove
+                  הסר חבר
                 </button>
               </div>
 

@@ -35,7 +35,7 @@ const ChatWindow = ({ currentUserId, friendId, friendName, onClose }) => {
       }
     });
 
-    // clear unread notification
+    // ניקוי התראה מהודעות שלא נקראו
     const unreadRef = ref(db, `unreadMessages/${currentUserId}/${friendId}`);
     remove(unreadRef);
 
@@ -54,7 +54,6 @@ const ChatWindow = ({ currentUserId, friendId, friendName, onClose }) => {
     await push(messagesRef, message);
     await set(metaRef, { lastMessageTime: Date.now() });
 
-    // notify friend
     const notifyRef = ref(db, `unreadMessages/${friendId}/${currentUserId}`);
     await set(notifyRef, true);
 
@@ -62,9 +61,9 @@ const ChatWindow = ({ currentUserId, friendId, friendName, onClose }) => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 bg-white shadow-lg rounded p-4 border border-gray-300 z-50">
+    <div className="fixed bottom-4 right-4 w-80 bg-white shadow-lg rounded p-4 border border-gray-300 z-50" dir="rtl">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="font-bold text-lg">Chat with {friendName}</h3>
+        <h3 className="font-bold text-lg">שיחה עם {friendName}</h3>
         <button onClick={onClose} className="text-gray-500 hover:text-red-500">✕</button>
       </div>
       <div className="h-64 overflow-y-auto border rounded p-2 mb-2 bg-gray-50">
@@ -88,13 +87,13 @@ const ChatWindow = ({ currentUserId, friendId, friendName, onClose }) => {
           className="flex-1 border p-2 rounded-l"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message..."
+          placeholder="כתוב הודעה..."
         />
         <button
           onClick={handleSendMessage}
           className="bg-blue-500 text-white px-4 rounded-r hover:bg-blue-600"
         >
-          Send
+          שלח
         </button>
       </div>
     </div>

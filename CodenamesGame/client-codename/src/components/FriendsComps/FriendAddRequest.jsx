@@ -18,7 +18,7 @@ const FriendAddRequest = ({ receiverUser }) => {
     const unsubscribe = onValue(statusRef, (snapshot) => {
       const status = snapshot.val();
       if (status && ["Approved", "Cancelled", "Rejected"].includes(status)) {
-        setHideBox(true); // hide the whole box
+        setHideBox(true); // הסתרה אם כבר אושר/נדחה
       }
     });
 
@@ -27,7 +27,7 @@ const FriendAddRequest = ({ receiverUser }) => {
 
   const handleSendRequest = async () => {
     if (!currentUser || !receiverUser?.userID) {
-      setMessage("❌ Invalid sender or receiver.");
+      setMessage("❌ שגיאה: המשתמש אינו תקף.");
       return;
     }
 
@@ -47,32 +47,32 @@ const FriendAddRequest = ({ receiverUser }) => {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ " + data.message);
+        setMessage("✅ בקשה נשלחה בהצלחה");
 
-        // Save request status to Firebase for realtime sync
+        // שמירת סטטוס ל־Firebase
         await set(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`), "Pending");
 
-        // Trigger UI refresh for both users
+        // עדכון בזמן אמת
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
       } else {
-        setMessage("❌ " + (data.message || "Failed to send request"));
+        setMessage("❌ " + (data.message || "שליחת הבקשה נכשלה."));
       }
     } catch (error) {
-      console.error("Request error:", error);
-      setMessage("❌ Error occurred while sending friend request.");
+      console.error("שגיאה בבקשה:", error);
+      setMessage("❌ אירעה שגיאה בעת שליחת בקשת החברות.");
     }
   };
 
   if (hideBox) return null;
 
   return (
-    <div className="flex flex-col items-end ml-4">
+    <div className="flex flex-col items-end ml-4" dir="rtl">
       <button
         onClick={handleSendRequest}
         className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
       >
-        Send Request
+        שלח בקשת חברות
       </button>
       {message && <p className="mt-2 text-sm">{message}</p>}
     </div>

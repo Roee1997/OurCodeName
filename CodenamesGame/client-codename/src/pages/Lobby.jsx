@@ -5,14 +5,13 @@ import BackgroundImage from "../components/BackgroundImage";
 import MainHeadLine from "../components/MainHeadLine";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import LogoutButton from "../components/LogoutButton";
 import codenamesImage from '../assets/codename.webp';
 
 const Lobby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
   const [gameIdInput, setGameIdInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (!user) {
     return <p>יש להתחבר כדי לגשת לדף זה.</p>;
@@ -35,20 +34,16 @@ const Lobby = () => {
       });
 
       if (!response.ok) throw new Error("שגיאה ביצירת המשחק");
-
       const data = await response.json();
-      const gameId = data.gameID;
-
-      navigate(`/game-lobby/${gameId}`);
+      navigate(`/game-lobby/${data.gameID}`);
     } catch (error) {
-      console.error("שגיאה ביצירת משחק:", error);
-      alert("אירעה שגיאה בעת יצירת המשחק.");
+      setErrorMessage("אירעה שגיאה בעת יצירת המשחק. נסה שוב מאוחר יותר.");
     }
   };
 
   const handleJoinGame = async () => {
     if (!gameIdInput) {
-      alert("יש להזין קוד משחק");
+      setErrorMessage("יש להזין קוד משחק");
       return;
     }
 
@@ -57,14 +52,13 @@ const Lobby = () => {
       const data = await res.json();
 
       if (!data.joinable) {
-        alert("המשחק לא קיים או שכבר התחיל.");
+        setErrorMessage("המשחק לא קיים או שכבר התחיל.");
         return;
       }
 
       navigate(`/game-lobby/${gameIdInput}`);
     } catch (error) {
-      console.error("שגיאה בבדיקת קוד המשחק:", error);
-      alert("שגיאה בבדיקת המשחק. נסה שוב.");
+      setErrorMessage("שגיאה בבדיקת המשחק. נסה שוב.");
     }
   };
 
@@ -73,12 +67,15 @@ const Lobby = () => {
       <Header />
       <BackgroundImage image={codenamesImage} />
 
-      
-
       <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-8 space-y-6">
         <MainHeadLine />
 
-        {/* כפתור התחלת משחק */}
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md text-center" role="alert">
+            <strong className="font-bold">שגיאה:</strong> <span>{errorMessage}</span>
+          </div>
+        )}
+
         <button
           onClick={handleCreateGame}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
@@ -86,7 +83,6 @@ const Lobby = () => {
           התחל משחק חדש
         </button>
 
-        {/* הצטרפות למשחק קיים */}
         <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md text-center space-y-4">
           <h2 className="text-xl font-bold text-gray-800">הצטרף למשחק קיים</h2>
 

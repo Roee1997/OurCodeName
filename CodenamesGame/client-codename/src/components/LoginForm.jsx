@@ -7,19 +7,21 @@ const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
       const user = await loginUser(email, password);
       console.log('✅ התחברות מוצלחת:', user);
-      alert('ההתחברות הצליחה!');
-      navigate('/Lobby');
+      setSuccess('✅ התחברת בהצלחה! מעביר אותך ללובי...');
+      setTimeout(() => navigate('/Lobby'), 1500);
     } catch (error) {
       console.error("❌ שגיאה בהתחברות:", error.code);
       switch (error.code) {
@@ -33,7 +35,7 @@ const LoginForm = () => {
           setError("אימייל או סיסמה שגויים.");
           break;
         case "auth/too-many-requests":
-          setError("נראה שעשית יותר מדי ניסיונות התחברות. נסה שוב מאוחר יותר.");
+          setError("נראה שעשית יותר מדי ניסיונות. נסה שוב מאוחר יותר.");
           break;
         default:
           setError("שגיאה בהתחברות. נסה שוב מאוחר יותר.");
@@ -44,15 +46,13 @@ const LoginForm = () => {
   };
 
   return (
-    <div >
-      {/* תוכן הטופס */}
+    <div>
       <div className="relative z-10 bg-gradient-to-r from-gray-800 via-gray-900 to-black p-8 rounded-xl shadow-2xl w-96 mx-auto mt-12">
-        <h2 className="text-3xl font-bold text-center mb-6 text-white drop-shadow-md">
-          התחברות
-        </h2>
-        
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        
+        <h2 className="text-3xl font-bold text-center mb-6 text-white drop-shadow-md">התחברות</h2>
+
+        {error && <p className="bg-red-100 text-red-700 border border-red-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{error}</p>}
+        {success && <p className="bg-green-100 text-green-700 border border-green-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{success}</p>}
+
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="email">אימייל</label>
@@ -62,7 +62,7 @@ const LoginForm = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white"
             />
           </div>
 
@@ -74,14 +74,14 @@ const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-lg shadow-lg hover:bg-gradient-to-l hover:from-orange-500 hover:to-yellow-500 disabled:bg-gray-500 transform hover:scale-105 transition-all"
+            className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-lg shadow-lg hover:bg-gradient-to-l hover:from-orange-500 hover:to-yellow-500 disabled:bg-gray-500"
           >
             {loading ? "מתחבר..." : "התחבר"}
           </button>

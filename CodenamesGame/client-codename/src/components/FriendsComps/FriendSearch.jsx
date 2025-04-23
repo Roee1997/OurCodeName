@@ -10,7 +10,7 @@ const FriendSearch = () => {
     setErrorMessage("");
     setSearchResult(null);
 
-    console.log("🔍 Query sent to server:", searchTerm);
+    console.log("🔍 נשלחה בקשת חיפוש לשרת:", searchTerm);
     const endpoint = `http://localhost:5150/api/friends/search?query=${searchTerm.trim()}`;
 
     try {
@@ -18,29 +18,29 @@ const FriendSearch = () => {
       if (!res.ok) throw new Error("User not found");
 
       const user = await res.json();
-      console.log("✅ User found:", user);
+      console.log("✅ משתמש נמצא:", user);
       setSearchResult(user);
     } catch (error) {
-      console.error("❌ Search error:", error.message);
-      setErrorMessage("User not found.");
+      console.error("❌ שגיאה בחיפוש:", error.message);
+      setErrorMessage("המשתמש לא נמצא.");
     }
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-6" dir="rtl">
       <div className="flex mb-2">
         <input
           type="text"
-          placeholder="Search by username or email"
+          placeholder="חפש לפי שם משתמש או אימייל"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border p-2 rounded w-64"
         />
         <button
           onClick={handleSearch}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="mr-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Search
+          חיפוש
         </button>
       </div>
 

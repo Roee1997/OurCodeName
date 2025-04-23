@@ -8,19 +8,21 @@ const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); 
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); 
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
       const user = await registerUser(username, email, password);
       console.log("✅ User registered successfully:", user);
-      alert("ההרשמה הצליחה!");
-      navigate("/Lobby");
+      setSuccess("✅ נרשמת בהצלחה! מעביר ללובי...");
+      setTimeout(() => navigate("/Lobby"), 1500);
 
     } catch (error) {
       console.error("❌ Registration error:", error.message);
@@ -36,15 +38,16 @@ const RegisterForm = () => {
 
     setLoading(false);
   };
+
   return (
     <div>
       <div className="relative z-10 bg-gradient-to-r from-gray-800 via-gray-900 to-black p-8 rounded-xl shadow-2xl w-96 mx-auto mt-12">
         <h2 className="text-3xl font-bold text-center mb-6 text-white drop-shadow-md">הרשמה</h2>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {error && <p className="bg-red-100 text-red-700 border border-red-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{error}</p>}
+        {success && <p className="bg-green-100 text-green-700 border border-green-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{success}</p>}
 
         <form onSubmit={handleRegister}>
-          {/* 🔹 Username Field */}
           <div className="mb-4">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="username">כינוי</label>
             <input
@@ -57,7 +60,6 @@ const RegisterForm = () => {
             />
           </div>
 
-          {/* 🔹 Email Field */}
           <div className="mb-4">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="email">אימייל</label>
             <input
@@ -70,7 +72,6 @@ const RegisterForm = () => {
             />
           </div>
 
-          {/* 🔹 Password Field */}
           <div className="mb-6">
             <label className="block text-gray-300 font-medium mb-2" htmlFor="password">סיסמה</label>
             <input

@@ -28,7 +28,6 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
     setNumber("");
   };
 
-  // ❌ אם זו לא הקבוצה שלך – תחכה
   if (team !== currentTurn) {
     return (
       <div className="text-center mt-2 text-gray-600 font-medium">
@@ -37,7 +36,6 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
     );
   }
 
-  // ❌ אם הקבוצה שלך בתור אבל כבר שלחת רמז – תחכה
   if (lastClue && lastClue.team === team) {
     return (
       <div className="text-center mt-2 text-gray-600 font-medium">
@@ -46,9 +44,11 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
     );
   }
 
-  // ✅ אם זו הקבוצה שלך ועדיין לא שלחת רמז – אפשר לשלוח
   return (
-    <div className="p-4 bg-gray-100 rounded shadow-md text-center">
+    <div
+      className="p-4 bg-gray-100 rounded shadow-md text-center"
+      style={{ maxWidth: "450px", margin: "0 auto" }} // ⬅️ צר יותר
+    >
       <h3 className="font-bold mb-2">
         🕵️ תן רמז לקבוצה {team === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
       </h3>
@@ -60,13 +60,18 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
           onChange={(e) => setWord(e.target.value)}
           className="border px-2 py-1 rounded w-1/2"
         />
-        <input
-          type="number"
-          placeholder="מספר"
+        <select
           value={number}
           onChange={(e) => setNumber(e.target.value)}
           className="border px-2 py-1 rounded w-1/4"
-        />
+        >
+          <option value="">בחר</option>
+          {[...Array(8)].map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {i + 1}
+            </option>
+          ))}
+        </select>
         <button
           onClick={handleSend}
           className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"

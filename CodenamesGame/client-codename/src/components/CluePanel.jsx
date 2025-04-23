@@ -1,9 +1,16 @@
-import React, { useState } from "react";
-import { sendClueToFirebase } from "../services/firebaseService";
+import React, { useEffect, useState } from "react";
+import { sendClueToFirebase, setLastClue, subscribeToLastClue } from "../services/firebaseService";
 
-const CluePanel = ({ team, gameId }) => {
+const CluePanel = ({ team, gameId, currentTurn }) => {
   const [word, setWord] = useState("");
   const [number, setNumber] = useState("");
+  const [lastClue, setLastClueState] = useState(null);
+
+  useEffect(() => {
+    if (!gameId) return;
+    const unsubscribe = subscribeToLastClue(gameId, setLastClueState);
+    return () => unsubscribe();
+  }, [gameId]);
 
   const handleSend = async () => {
     if (!word || !number) return;
@@ -13,11 +20,33 @@ const CluePanel = ({ team, gameId }) => {
       team,
       timestamp: Date.now(),
     };
+
     await sendClueToFirebase(gameId, clue);
+    await setLastClue(gameId, clue);
+
     setWord("");
     setNumber("");
   };
 
+  // ❌ אם זו לא הקבוצה שלך – תחכה
+  if (team !== currentTurn) {
+    return (
+      <div className="text-center mt-2 text-gray-600 font-medium">
+        ⏳ ממתין לתור הקבוצה שלך...
+      </div>
+    );
+  }
+
+  // ❌ אם הקבוצה שלך בתור אבל כבר שלחת רמז – תחכה
+  if (lastClue && lastClue.team === team) {
+    return (
+      <div className="text-center mt-2 text-gray-600 font-medium">
+        🕵️ שלחת רמז – ממתין לסיום התור...
+      </div>
+    );
+  }
+
+  // ✅ אם זו הקבוצה שלך ועדיין לא שלחת רמז – אפשר לשלוח
   return (
     <div className="p-4 bg-gray-100 rounded shadow-md text-center">
       <h3 className="font-bold mb-2">

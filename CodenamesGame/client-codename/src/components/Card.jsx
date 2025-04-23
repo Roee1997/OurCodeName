@@ -5,9 +5,8 @@ import blueTeamImg from "../assets/blueteam.jpeg";
 import neutralImg from "../assets/neutral.jpeg";
 import redTeamImg from "../assets/redteam.jpeg";
 import "../css/Card.css";
-import { updateCardInFirebase } from "../services/firebaseService";
 
-const Card = ({ card, gameId, canClick, onCardRevealed }) => {
+const Card = ({ card, gameId, canClick, onCardRevealed, currentTurn, userTeam, isSpymaster }) => {
   const { word, team, isRevealed, cardID } = card;
 
   const getCardImage = () => {
@@ -20,50 +19,28 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
     }
   };
 
-  const handleClick = async () => {
+  const handleClick = () => {
     if (!canClick || isRevealed) return;
 
-    try {
-      const res = await fetch(`http://localhost:5150/api/games/${gameId}/reveal/${cardID}`, {
-        method: "PUT"
-      });
-  
-      if (!res.ok) {
-        console.error("❌ שגיאה בגילוי קלף בשרת");
-        return;
-      }
-  
-      // ✅ עדכון בזמן אמת ב-Firebase
-      await updateCardInFirebase(gameId, {
-        ...card,
-        isRevealed: true
-      });
-  
-      if (onCardRevealed) onCardRevealed(); // אופציונלי - אפשר להסיר אם לא דרוש
-    } catch (error) {
-      console.error("❌ שגיאה בגילוי קלף:", error);
+    if (userTeam !== currentTurn || isSpymaster) {
+      console.warn("⛔ לא תורך או שאתה לוחש – לא ניתן לנחש");
+      return;
     }
+
+    // ✅ רק מפעיל את פונקציית ההורה (Board)
+    if (onCardRevealed) onCardRevealed(card);
   };
 
-  const hiddenStyle = {
-    backgroundColor: "#ccc",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: "2rem",
-    fontWeight: "bold",
-    color: "#333",
-  };
+  const cardImage = getCardImage();
 
-  const revealedStyle = isRevealed
+  const cardStyle = isRevealed
     ? {
-        backgroundImage: `url(${getCardImage()})`,
+        backgroundImage: `url(${cardImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }
-    : team === "Hidden"
-    ? hiddenStyle
-    : {
+    : isSpymaster
+    ? {
         backgroundColor:
           team === "Red"
             ? "#ffdddd"
@@ -72,44 +49,25 @@ const Card = ({ card, gameId, canClick, onCardRevealed }) => {
             : team === "Assassin"
             ? "#888888"
             : "#eeeeee",
+      }
+    : {
+        backgroundColor: "#eeeeee", // סוכן רואה הכל אפור לפני גילוי
       };
 
   return (
     <motion.div
-    onClick={handleClick}
-    initial={{ rotateY: 0 }}
-    animate={{ rotateY: isRevealed ? 180 : 0 }}
-    transition={{ duration: 0.6 }}
-    className="card-wrapper"
-  >
-    <div
-      className="card"
-      style={
-        isRevealed
-          ? {
-              backgroundImage: `url(${getCardImage()})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }
-          : team === "Hidden"
-          ? hiddenStyle
-          : {
-              backgroundColor:
-                team === "Red"
-                  ? "#ffdddd"
-                  : team === "Blue"
-                  ? "#ddddff"
-                  : team === "Assassin"
-                  ? "#888888"
-                  : "#eeeeee",
-            }
-      }
+      onClick={handleClick}
+      initial={{ rotateY: 0 }}
+      animate={{ rotateY: isRevealed ? 180 : 0 }}
+      transition={{ duration: 0.6 }}
+      className="card-wrapper"
     >
-      {!isRevealed && (
-        <div className="text-center font-bold text-lg text-black">{word}</div>
-      )}
-    </div>
-  </motion.div>
+      <div className="card" style={cardStyle}>
+        {!isRevealed && (
+          <div className="text-center font-bold text-lg text-black">{word}</div>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

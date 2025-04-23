@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../../firebaseConfig"; // נוודא שהשירות הזה קיים
 import { useAuth } from "../context/AuthContext";
-import { saveBoardToFirebase, savePlayerToLobby, subscribeToLobbyPlayers } from "../services/firebaseService";
+import { saveBoardToFirebase, savePlayerToLobby, setTurn, subscribeToLobbyPlayers } from "../services/firebaseService";
+
 
 const GameLobby = () => {
   const { gameId } = useParams();
@@ -149,8 +150,11 @@ const GameLobby = () => {
         return;
       }
 
-          // ✅ שלב חדש: שמור את הקלפים ל־Realtime Database
+      // ✅ שלב חדש: שמור את הקלפים ל־Realtime Database
       await saveBoardToFirebase(gameId, data.board);
+      // ✅ הגרלת תור ראשון רנדומלי ושמירה ל־Firebase
+      const randomTeam = Math.random() < 0.5 ? "Red" : "Blue";
+      await setTurn(gameId, randomTeam);
 
       // ✅ עדכון ב־Firebase כדי שכולם יעברו למסך המשחק
       await set(ref(db, `lobbies/${gameId}/status`), "started");

@@ -106,3 +106,16 @@ export const subscribeToWinner = (gameId, callback) => {
     callback(snapshot.val());
   });
 };
+
+export const setGameEnded = (gameId) => {
+  const refEnded = ref(db, `games/${gameId}/gameEnded`);
+  return set(refEnded, true);
+};
+
+export const subscribeToGameEnded = (gameId, callback) => {
+  const refEnded = ref(db, `games/${gameId}/gameEnded`);
+  return onValue(refEnded, (snapshot) => {
+    const ended = snapshot.val();
+    callback(ended);
+  });
+};

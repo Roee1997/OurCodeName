@@ -14,16 +14,28 @@ const Header = () => {
 
   useEffect(() => {
     if (!user?.uid) return;
-
-    // הודעות שלא נקראו
+  
     const unreadRef = ref(db, `unreadMessages/${user.uid}`);
+    let previousUnread = {};
+  
     const unsubscribeMessages = onValue(unreadRef, (snapshot) => {
       const data = snapshot.val() || {};
       const hasUnread = Object.values(data).some((v) => v === true);
       setHasUnreadMessages(hasUnread);
+  
+      // השוואה עם המצב הקודם
+      const newSender = Object.entries(data).find(
+        ([senderId, val]) => val === true && !previousUnread[senderId]
+      );
+  
+      if (newSender) {
+        setPopupMessage("קיבלת הודעה חדשה!");
+        setTimeout(() => setPopupMessage(""), 5000);
+      }
+  
+      previousUnread = data;
     });
-
-    // בקשת חברות חדשה
+  
     const unsubscribeFriendAlert = subscribeToFriendRequestAlerts(user.uid, (hasAlert) => {
       setHasFriendRequestAlert(hasAlert);
       if (hasAlert) {
@@ -34,12 +46,13 @@ const Header = () => {
         }, 5000);
       }
     });
-
+  
     return () => {
       unsubscribeMessages();
       unsubscribeFriendAlert();
     };
   }, [user?.uid]);
+  
 
   return (
     <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">

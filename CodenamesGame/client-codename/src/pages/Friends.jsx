@@ -1,26 +1,40 @@
 import React from "react";
 import FriendSearch from "../components/FriendsComps/FriendSearch";
-import FriendsPendingRequests from "../components/FriendsComps/FriendsPendingRequests"; // ⬅️ ייבוא הקומפוננטה החדשה
+import FriendsPendingRequests from "../components/FriendsComps/FriendsPendingRequests";
 import FriendsList from "../components/FriendsComps/FriendsList";
+import BackgroundImage from "../components/BackgroundImage";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import codenamesImage from "../assets/codename.webp";
 
 const Friends = () => {
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Friends</h1>
+    <div className="relative min-h-screen flex flex-col">
+      {/* 🔝 כותרת עליונה */}
+      <Header />
 
-      <section className="mb-8">
-        <FriendSearch />
-      </section>
+      {/* 🖼️ רקע עם שקיפות */}
+      <BackgroundImage image={codenamesImage} />
 
-      <section className="mb-8">
-        <FriendsPendingRequests />
-      </section>
+      {/* 📦 תוכן העמוד */}
+      <div className="relative z-10 container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-4 text-white">Friends</h1>
 
-      <section className="mb-8">
-        <FriendsList />
-      </section>
+        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow">
+          <FriendSearch />
+        </section>
 
-      {/* בהמשך נוסיף כאן את FriendsList ו-CreateGameInvite */}
+        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow">
+          <FriendsPendingRequests />
+        </section>
+
+        <section className="mb-8 bg-white bg-opacity-90 p-4 rounded shadow">
+          <FriendsList />
+        </section>
+      </div>
+
+      {/* ⚓ פוטר */}
+      <Footer className="mt-auto" />
     </div>
   );
 };

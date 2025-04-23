@@ -9,6 +9,8 @@ import Home from "./pages/Home";
 import LobbyPage from "./pages/Lobby";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import Rules from "./pages/Rules";
+
 
 function App() {
   return (
@@ -22,6 +24,7 @@ function App() {
             <Route path="/lobby" element={<LobbyPage />} />
             <Route path="/game/:gameId" element={<Game />} /> {/* ✅ תיקון כאן */}
             <Route path="/game-lobby/:gameId" element={<GameLobby />} />
+            <Route path="/rules" element={<Rules />} />
             <Route path="/friends" element={<Friends />} />
           </Route>
 

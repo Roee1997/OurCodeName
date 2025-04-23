@@ -38,8 +38,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
+}
 app.UseCors("AllowAll"); // ✅ Apply CORS
 
 app.UseAuthorization();

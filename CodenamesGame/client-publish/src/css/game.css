@@ -1,0 +1,41 @@
+/* עיצוב לוח המשחק */
+.board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 עמודות */
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  /* עיצוב קלפים */
+  .card {
+    width: 120px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: lightgray;
+    color: black;
+    font-size: 18px;
+    border: 1px solid #000;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  .card.revealed.red {
+    background-color: red;
+    color: white;
+  }
+  
+  .card.revealed.blue {
+    background-color: blue;
+    color: white;
+  }
+  
+  .card.revealed.neutral {
+    background-color: beige;
+  }
+  
+  .card.revealed.assassin {
+    background-color: black;
+    color: white;
+  }

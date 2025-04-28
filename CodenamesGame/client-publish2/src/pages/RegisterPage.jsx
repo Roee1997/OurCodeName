@@ -3,7 +3,7 @@ import BackgroundImage from "../components/BackgroundImage";
 import Footer from "../components/Footer";
 import Register from '../components/RegisterForm';
 import MainHeadLine from "../components/MainHeadLine";
-import codenamesImage from '../assets/codename.webp';
+import codenamesImage from '../assets/codename.png';
 
 const RegisterPage = () => {
     return (

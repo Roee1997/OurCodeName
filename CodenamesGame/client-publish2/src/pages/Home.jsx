@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import codenamesImage from '../assets/codename.webp'; // תמונה של הרקע
-import titleImage from '../assets/logo-codenames.webp'; // התמונה החדשה שאתה רוצה להוסיף ככותרת
+import codenamesImage from '../assets/codename.png'; // תמונה של הרקע
+import titleImage from '../assets/logo-codenames.png'; // התמונה החדשה שאתה רוצה להוסיף ככותרת
 import BackgroundImage from "../components/BackgroundImage";
 import MainHeadLine from "../components/MainHeadLine";
 import LoginButtons from "../components/LoginButtons";

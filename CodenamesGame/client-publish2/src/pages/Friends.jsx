@@ -5,7 +5,7 @@ import FriendsList from "../components/FriendsComps/FriendsList";
 import BackgroundImage from "../components/BackgroundImage";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import codenamesImage from "../assets/codename.webp";
+import codenamesImage from "../assets/codename.png";
 
 const Friends = () => {
   return (

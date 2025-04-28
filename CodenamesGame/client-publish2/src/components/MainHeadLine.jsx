@@ -1,5 +1,5 @@
 import React from 'react';
-import titleImage from '../assets/logo-codenames.webp'; // התמונה החדשה שאתה רוצה להוסיף ככותרת
+import titleImage from '../assets/logo-codenames.png'; // התמונה החדשה שאתה רוצה להוסיף ככותרת
 
 const Header = () => {
   return (

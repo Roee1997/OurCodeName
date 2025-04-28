@@ -13,7 +13,7 @@ import {
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import BackgroundImage from "../components/BackgroundImage";
-import codenamesImage from "../assets/codename.webp";
+import codenamesImage from "../assets/codename.png";
 
 const GameLobby = () => {
   const { gameId } = useParams();

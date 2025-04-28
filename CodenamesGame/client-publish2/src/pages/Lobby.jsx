@@ -5,7 +5,7 @@ import BackgroundImage from "../components/BackgroundImage";
 import MainHeadLine from "../components/MainHeadLine";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import codenamesImage from '../assets/codename.webp';
+import codenamesImage from '../assets/codename.png';
 
 const Lobby = () => {
   const { user } = useAuth();

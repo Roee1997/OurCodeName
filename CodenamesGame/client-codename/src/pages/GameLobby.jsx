@@ -111,7 +111,24 @@ const GameLobby = () => {
       toast.error("שגיאה בעדכון שחקן");
     }
   };
-
+  const leaveTeam = async () => {
+    try {
+      await fetch(`http://localhost:5150/api/playeringames/${gameId}/leave`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameID: parseInt(gameId),
+          userID: user.uid
+        })
+      });
+  
+      await set(ref(db, `lobbies/${gameId}/players/${user.uid}`), null);
+      toast.info("יצאת מהקבוצה");
+    } catch (err) {
+      toast.error("שגיאה ביציאה מהקבוצה");
+    }
+  };
+  
   const toggleSpymaster = (team) => {
     const player = players.find(p => p.userID === user.uid);
     if (!player || player.team !== team) return;
@@ -219,6 +236,13 @@ const GameLobby = () => {
                               >
                                 {player.isSpymaster ? "הפוך לסוכן" : "הפוך ללוחש"}
                               </button>
+                              <button
+                                onClick={leaveTeam}
+                                className="ml-2 text-sm text-red-600 underline"
+                              >
+                                צא מהקבוצה
+                              </button>
+
                             </>
                           ) : (
                             <>

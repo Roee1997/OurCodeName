@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { db } from "../../../firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
 
 const OnlineFriendsList = ({ userId, currentGameId }) => {
   const { user } = useAuth();
+  const location = useLocation();
   const [friends, setFriends] = useState([]);
   const [statusMap, setStatusMap] = useState({});
 
@@ -23,7 +27,6 @@ const OnlineFriendsList = ({ userId, currentGameId }) => {
           friendsArray = Object.values(data);
         }
 
-        console.log("Fetched friends:", friendsArray);
         setFriends(friendsArray);
       } catch (err) {
         console.error("שגיאה בשליפת חברים:", err);
@@ -43,21 +46,31 @@ const OnlineFriendsList = ({ userId, currentGameId }) => {
   useEffect(() => {
     if (!userId) return;
 
+    // רשימת עמודים שבהם לא נרצה להציג התראה
+    const excludedPaths = ["/login", "/register", "/game/"];
+    const shouldShowToast = !excludedPaths.some(path => location.pathname.startsWith(path));
+
     const invitationsRef = ref(db, `invitations/${userId}`);
     const unsubscribe = onValue(invitationsRef, (snapshot) => {
       const invitation = snapshot.val();
-      if (invitation?.gameId) {
+      if (invitation?.gameId && shouldShowToast) {
         const sender = invitation.fromName || "שחקן אחר";
-        const accept = window.confirm(`🎲 ${sender} הזמין אותך להצטרף למשחק. האם להצטרף?`);
-        if (accept) {
-          set(ref(db, `invitations/${userId}`), null);
-          window.location.href = `/game-lobby/${invitation.gameId}`;
-        }
+        toast.info(
+          `${sender} הזמין אותך למשחק!`,
+          {
+            position: "top-center",
+            autoClose: 10000,
+            onClick: () => {
+              set(ref(db, `invitations/${userId}`), null);
+              window.location.href = `/game-lobby/${invitation.gameId}`;
+            }
+          }
+        );
       }
     });
 
     return () => unsubscribe();
-  }, [userId]);
+  }, [userId, location]);
 
   const sendInvitation = async (friendId) => {
     try {
@@ -67,10 +80,10 @@ const OnlineFriendsList = ({ userId, currentGameId }) => {
         gameId: currentGameId,
         timestamp: Date.now(),
       });
-      alert("ההזמנה נשלחה בהצלחה!");
+      toast.success("ההזמנה נשלחה בהצלחה!");
     } catch (err) {
       console.error("שגיאה בשליחת הזמנה:", err);
-      alert("אירעה שגיאה בשליחת ההזמנה.");
+      toast.error("אירעה שגיאה בשליחת ההזמנה.");
     }
   };
 

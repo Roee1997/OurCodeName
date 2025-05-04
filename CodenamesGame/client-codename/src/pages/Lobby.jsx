@@ -8,6 +8,8 @@ import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
 import { setUserOnlineStatus } from "../services/firebaseService";
 import { toast } from "react-toastify";
+import { ref, onValue, set } from "firebase/database";
+import { db } from "../../firebaseConfig";
 
 const Lobby = () => {
   const { user } = useAuth();
@@ -16,7 +18,53 @@ const Lobby = () => {
 
   useEffect(() => {
     if (user?.uid) {
-      setUserOnlineStatus(user.uid, false, null); // המשתמש מחובר, לא במשחק
+      setUserOnlineStatus(user.uid, false, null);
+
+      const invitationsRef = ref(db, `invitations/${user.uid}`);
+      const unsubscribe = onValue(invitationsRef, (snapshot) => {
+        const invitation = snapshot.val();
+        if (invitation?.gameId) {
+          const sender = invitation.fromName || "שחקן אלמוני";
+
+          toast(
+            ({ closeToast }) => (
+              <div className="text-right">
+                <div className="mb-2 font-bold">{sender} הזמין אותך למשחק!</div>
+                <div className="flex justify-end gap-2 mt-2">
+                  <button
+                    onClick={() => {
+                      set(ref(db, `invitations/${user.uid}`), null);
+                      closeToast();
+                      navigate(`/game-lobby/${invitation.gameId}`);
+                    }}
+                    className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    הצטרף
+                  </button>
+                  <button
+                    onClick={() => {
+                      set(ref(db, `invitations/${user.uid}`), null);
+                      closeToast();
+                    }}
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    דחה
+                  </button>
+                </div>
+              </div>
+            ),
+            {
+              position: "top-center",
+              autoClose: false,
+              closeOnClick: false,
+              draggable: false,
+              closeButton: true
+            }
+          );
+        }
+      });
+
+      return () => unsubscribe();
     }
   }, [user]);
 

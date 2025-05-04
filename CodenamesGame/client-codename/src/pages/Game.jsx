@@ -13,6 +13,7 @@ import {
   subscribeToTurn,
   subscribeToWinner,
   setUserOnlineStatus,
+  subscribeToLobbyPlayers,
 } from "../services/firebaseService";
 
 import Header from "../components/Header";
@@ -31,10 +32,11 @@ const Game = () => {
   const [currentTurn, setCurrentTurn] = useState(null);
   const [winner, setWinner] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(null);
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     if (!gameId || !user?.uid) return;
-    setUserOnlineStatus(user.uid, true, gameId); // המשתמש בתוך משחק
+    setUserOnlineStatus(user.uid, true, gameId);
 
     const playerRef = ref(db, `lobbies/${gameId}/players/${user.uid}`);
     return onValue(playerRef, (snapshot) => {
@@ -91,8 +93,17 @@ const Game = () => {
     return () => unsubscribe();
   }, [gameId]);
 
+  useEffect(() => {
+    if (!gameId) return;
+    const unsubscribe = subscribeToLobbyPlayers(gameId, setPlayers);
+    return () => unsubscribe();
+  }, [gameId]);
+
   if (loading) return <p className="text-center text-white mt-20">⏳ טוען משתמש...</p>;
   if (!user) return <p className="text-center text-red-500 mt-20">😢 אין גישה</p>;
+
+  const redTeam = players.filter((p) => p.team === "Red");
+  const blueTeam = players.filter((p) => p.team === "Blue");
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -125,6 +136,43 @@ const Game = () => {
             </div>
           )}
 
+          {/* 👥 הצגת שחקנים */}
+          <div className="flex justify-around gap-8 mb-6">
+            {["Red", "Blue"].map((teamColor) => {
+              const teamPlayers = players.filter((p) => p.team === teamColor);
+              return (
+                <div
+                  key={teamColor}
+                  className="flex-1 bg-white/80 p-4 rounded text-black shadow"
+                >
+                  <h2
+                    className={`text-xl font-bold mb-2 ${
+                      teamColor === "Red" ? "text-red-600" : "text-blue-600"
+                    }`}
+                  >
+                    קבוצה {teamColor === "Red" ? "אדומה" : "כחולה"}
+                  </h2>
+                  <ul className="space-y-2">
+                    {teamPlayers.map((player) => (
+                      <li key={player.userID}>
+                        <span
+                          className={
+                            player.userID === user.uid
+                              ? "font-bold text-green-800"
+                              : ""
+                          }
+                        >
+                          {player.username || `שחקן (${player.userID.slice(0, 5)}...)`}
+                        </span>
+                        {player.isSpymaster && " 🕵️"}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 lg:pr-6">
               <Board
@@ -137,7 +185,11 @@ const Game = () => {
               />
               {isSpymaster && team && (
                 <div className="mt-4">
-                  <CluePanel gameId={gameId} team={team} currentTurn={currentTurn} />
+                  <CluePanel
+                    gameId={gameId}
+                    team={team}
+                    currentTurn={currentTurn}
+                  />
                 </div>
               )}
             </div>

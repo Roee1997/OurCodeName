@@ -14,6 +14,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import BackgroundImage from "../components/BackgroundImage";
 import codenamesImage from "../assets/codename.webp";
+import OnlineFriendsList from "../components/FriendsComps/OnlineFriendsList";
 
 const GameLobby = () => {
   const { gameId } = useParams();
@@ -161,72 +162,83 @@ const GameLobby = () => {
       <main className="relative z-10 container mx-auto p-6 text-white" dir="rtl">
         <h1 className="text-3xl font-bold mb-4 text-center">חדר משחק #{gameId}</h1>
 
-        <div className="flex justify-center gap-4 mb-6">
-          <button
-            onClick={() => joinGameIfNeeded("Red", false)}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            הצטרף לאדומים
-          </button>
-          <button
-            onClick={() => joinGameIfNeeded("Blue", false)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            הצטרף לכחולים
-          </button>
-        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1">
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                onClick={() => joinGameIfNeeded("Red", false)}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                הצטרף לאדומים
+              </button>
+              <button
+                onClick={() => joinGameIfNeeded("Blue", false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                הצטרף לכחולים
+              </button>
+            </div>
 
-        <div className="flex justify-around gap-8 mb-6">
-          {["Red", "Blue"].map((teamColor) => {
-            const teamPlayers = players.filter(p => p.team === teamColor);
-            return (
-              <div key={teamColor} className="flex-1 bg-white/90 p-4 rounded text-black shadow">
-                <h2 className={`text-xl font-bold mb-2 ${teamColor === "Red" ? "text-red-600" : "text-blue-600"}`}>
-                  קבוצה {teamColor === "Red" ? "אדומה" : "כחולה"}
-                </h2>
-                <ul className="space-y-2">
-                  {teamPlayers.map(player => (
-                    <li key={player.userID}>
-                      {player.userID === user.uid ? (
-                        <>
-                          <span className="font-bold text-green-800">
-                            {player.username || "אתה"}
-                          </span>
-                          {player.isSpymaster && " 🕵️"}
-                          <button
-                            onClick={() => joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false)}
-                            className="ml-2 text-sm text-yellow-600 underline"
-                          >
-                            החלף קבוצה
-                          </button>
-                          <button
-                            onClick={() => toggleSpymaster(teamColor)}
-                            className="ml-2 text-sm text-blue-500 underline"
-                          >
-                            {player.isSpymaster ? "הפוך לסוכן" : "הפוך ללוחש"}
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {player.username || `שחקן (${player.userID.slice(0, 5)}...)`}
-                          {player.isSpymaster && " 🕵️"}
-                        </>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
+            <div className="flex justify-around gap-8 mb-6">
+              {["Red", "Blue"].map((teamColor) => {
+                const teamPlayers = players.filter(p => p.team === teamColor);
+                return (
+                  <div key={teamColor} className="flex-1 bg-white/90 p-4 rounded text-black shadow">
+                    <h2 className={`text-xl font-bold mb-2 ${teamColor === "Red" ? "text-red-600" : "text-blue-600"}`}>
+                      קבוצה {teamColor === "Red" ? "אדומה" : "כחולה"}
+                    </h2>
+                    <ul className="space-y-2">
+                      {teamPlayers.map(player => (
+                        <li key={player.userID}>
+                          {player.userID === user.uid ? (
+                            <>
+                              <span className="font-bold text-green-800">
+                                {player.username || "אתה"}
+                              </span>
+                              {player.isSpymaster && " 🕵️"}
+                              <button
+                                onClick={() => joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false)}
+                                className="ml-2 text-sm text-yellow-600 underline"
+                              >
+                                החלף קבוצה
+                              </button>
+                              <button
+                                onClick={() => toggleSpymaster(teamColor)}
+                                className="ml-2 text-sm text-blue-500 underline"
+                              >
+                                {player.isSpymaster ? "הפוך לסוכן" : "הפוך ללוחש"}
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {player.username || `שחקן (${player.userID.slice(0, 5)}...)`}
+                              {player.isSpymaster && " 🕵️"}
+                            </>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
 
-        <div className="text-center">
-          <button
-            onClick={startGame}
-            className="px-6 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700"
-          >
-            התחל משחק
-          </button>
+            <div className="text-center">
+              <button
+                onClick={startGame}
+                className="px-6 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700"
+              >
+                התחל משחק
+              </button>
+            </div>
+          </div>
+
+          <div className="w-full lg:w-[22rem] xl:w-[26rem] bg-white/20 backdrop-blur p-4 rounded shadow text-white">
+            <h2 className="text-xl font-bold mb-4">👥 חברים מחוברים</h2>
+            {user?.uid && (
+  <OnlineFriendsList userId={user.uid} currentGameId={gameId} />
+)}
+          </div>
         </div>
       </main>
 

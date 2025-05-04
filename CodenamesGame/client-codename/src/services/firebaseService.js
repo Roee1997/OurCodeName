@@ -1,4 +1,4 @@
-import { onValue, push, ref, set, remove  } from "firebase/database";
+import { onValue, push, ref, set, remove , serverTimestamp,onDisconnect } from "firebase/database";
 import { db } from "../../firebaseConfig"; // בגלל שהfirebaseConfig.js נמצא בשורש
 
 
@@ -221,6 +221,29 @@ export const subscribeToFriendRequestAlerts = (userId, callback) => {
 export const clearFriendRequestAlert = (userId) => {
   const alertRef = ref(db, `friendRequestAlerts/${userId}`);
   return remove(alertRef);
+};
+export const setUserOnlineStatus = (userId, isInGame = false, gameId = null) => {
+  const statusRef = ref(db, `playersStatus/${userId}`);
+
+  const onlineStatus = {
+    online: true,
+    inGame: isInGame,
+    gameId: gameId,
+    lastSeen: serverTimestamp(),
+  };
+
+  const offlineStatus = {
+    online: false,
+    inGame: false,
+    gameId: null,
+    lastSeen: serverTimestamp(),
+  };
+
+  // קובע את המשתמש כ-online
+  set(statusRef, onlineStatus);
+
+  // אם הדפדפן נסגר, המשתמש יהפוך אוטומטית ל-offline
+  onDisconnect(statusRef).set(offlineStatus);
 };
 
 export const subscribeToReceivedFriendRequests = (userId, callback) => {

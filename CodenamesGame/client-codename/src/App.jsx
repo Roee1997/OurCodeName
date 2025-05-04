@@ -10,6 +10,9 @@ import LobbyPage from "./pages/Lobby";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Rules from "./pages/Rules";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 
 function App() {
@@ -30,6 +33,12 @@ function App() {
 
           <Route path="*" element={<Home />} />
         </Routes>
+        <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        rtl={true}
+        pauseOnFocusLoss={false}
+      />
       </div>
     </AuthProvider>
   );

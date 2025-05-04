@@ -1,28 +1,25 @@
 import React, { useState } from "react";
 import FriendAddRequest from "./FriendAddRequest";
+import { showToast } from "../../services/toastService";
 
 const FriendSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResult, setSearchResult] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSearch = async () => {
-    setErrorMessage("");
     setSearchResult(null);
 
-    console.log("נשלחה בקשת חיפוש לשרת:", searchTerm);
     const endpoint = `http://localhost:5150/api/friends/search?query=${searchTerm.trim()}`;
-
     try {
       const res = await fetch(endpoint);
       if (!res.ok) throw new Error("User not found");
 
       const user = await res.json();
-      console.log("משתמש נמצא:", user);
       setSearchResult(user);
+      showToast("משתמש נמצא!", "success");
     } catch (error) {
       console.error("שגיאה בחיפוש:", error.message);
-      setErrorMessage("המשתמש לא נמצא.");
+      showToast("המשתמש לא נמצא.", "error");
     }
   };
 
@@ -43,8 +40,6 @@ const FriendSearch = () => {
           חיפוש
         </button>
       </div>
-
-      {errorMessage && <p className="text-red-500 mt-1">{errorMessage}</p>}
 
       {searchResult && (
         <div className="bg-white p-4 rounded shadow flex justify-between items-center">

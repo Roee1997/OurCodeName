@@ -19,18 +19,20 @@ namespace server_codenames.Controllers
 
                 return result switch
                 {
-                    "FriendRequestSent" => Ok(new { message = "Friend request sent successfully." }),
-                    "AlreadyPending" => Conflict(new { message = "A friend request is already pending." }),
-                    "AlreadyFriends" => BadRequest(new { message = "You are already friends." }),
-                    "UserNotFound" => NotFound(new { message = "User not found." }),
-                    _ => BadRequest(new { message = result }) // החזרת שגיאה כללית
+                    "FriendRequestSent" => Ok(new { message = "בקשת החברות נשלחה בהצלחה." }),
+                    "AlreadyPending" => Conflict(new { message = " בקשת חברות כבר ממתינה לאישור." }),
+                    "AlreadyFriends" => BadRequest(new { message = " אתם כבר חברים." }),
+                    "CannotSendToSelf" => BadRequest(new { message = " לא ניתן לשלוח בקשת חברות לעצמך." }),
+                    "ReceiverNotFound" => NotFound(new { message = " המשתמש לא נמצא." }),
+                    _ => BadRequest(new { message = "שגיאה כללית בשליחת הבקשה." })
                 };
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Server error: " + ex.Message });
+                return StatusCode(500, new { message = "שגיאה בשרת: " + ex.Message });
             }
         }
+
         // Payload model for friend request
         public class FriendRequestPayload
         {
@@ -48,13 +50,13 @@ namespace server_codenames.Controllers
                 server_codenames.BL.Users user = server_codenames.BL.Users.GetUserByUsernameOrID(query);
                 if (user != null)
                 {
-                    return Ok(user); // 200 + JSON with user details
+                    return Ok(user); // מצא משתמש
                 }
-                return NotFound(new { message = "User not found." });
+                return NotFound(new { message = "המשתמש לא נמצא." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Server error: " + ex.Message });
+                return StatusCode(500, new { message = "שגיאה בשרת: " + ex.Message });
             }
         }
 
@@ -95,14 +97,15 @@ namespace server_codenames.Controllers
             {
                 string result = Friend.CancelFriendRequest(payload.SenderID, payload.ReceiverID, payload.Action);
                 return result == "RequestUpdated"
-                    ? Ok(new { message = "Request updated successfully." })
+                    ? Ok(new { message = "הבקשה עודכנה בהצלחה." })
                     : BadRequest(new { message = result });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "שגיאה בשרת: " + ex.Message });
             }
         }
+
         // Payload model for cancel request
         public class CancelRequestPayload
         {
@@ -110,6 +113,7 @@ namespace server_codenames.Controllers
             public string ReceiverID { get; set; }
             public string Action { get; set; } // "cancel" or "decline"
         }
+
 
 
         [HttpPut("accept")]

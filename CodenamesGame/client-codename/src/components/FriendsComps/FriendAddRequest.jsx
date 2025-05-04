@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { auth, db } from "../../../firebaseConfig";
 import { notifyFriendSync } from "../../services/firebaseService";
 import { set, ref, onValue } from "firebase/database";
+import { showToast } from "../../services/toastService"; 
 
 const FriendAddRequest = ({ receiverUser }) => {
-  const [message, setMessage] = useState("");
   const [hideBox, setHideBox] = useState(false);
   const currentUser = auth.currentUser;
 
@@ -18,7 +18,7 @@ const FriendAddRequest = ({ receiverUser }) => {
     const unsubscribe = onValue(statusRef, (snapshot) => {
       const status = snapshot.val();
       if (status && ["Approved", "Cancelled", "Rejected"].includes(status)) {
-        setHideBox(true); // הסתרה אם כבר אושר/נדחה
+        setHideBox(true);
       }
     });
 
@@ -27,7 +27,7 @@ const FriendAddRequest = ({ receiverUser }) => {
 
   const handleSendRequest = async () => {
     if (!currentUser || !receiverUser?.userID) {
-      setMessage("שגיאה: המשתמש אינו תקף.");
+      showToast("שגיאה: המשתמש אינו תקף.", "error");
       return;
     }
 
@@ -47,23 +47,18 @@ const FriendAddRequest = ({ receiverUser }) => {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("הבקשה נשלחה בהצלחה.");
+        showToast("בקשת החברות נשלחה בהצלחה!", "success");
 
-        // סטטוס לפיירבייס
         await set(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`), "Pending");
-
-        // סימון בקשת חברות כהתראה למקבל
         await set(ref(db, `friendRequestAlerts/${receiverID}`), true);
-
-        // טריגר סינכרון לחברים
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
       } else {
-        setMessage(data.message || "שליחת הבקשה נכשלה.");
+        showToast(data.message || "שליחת הבקשה נכשלה.", "error");
       }
     } catch (error) {
       console.error("שגיאה בבקשה:", error);
-      setMessage("אירעה שגיאה בעת שליחת בקשת החברות.");
+      showToast("אירעה שגיאה בעת שליחת הבקשה.", "error");
     }
   };
 
@@ -77,7 +72,6 @@ const FriendAddRequest = ({ receiverUser }) => {
       >
         שלח בקשת חברות
       </button>
-      {message && <p className="mt-2 text-sm text-right">{message}</p>}
     </div>
   );
 };

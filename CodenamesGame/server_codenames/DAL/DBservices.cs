@@ -485,7 +485,7 @@ namespace Server_codenames.DAL
             }
             catch (Exception ex)
             {
-                throw new Exception("Database connection failed.", ex);
+                throw new Exception("❌ שגיאה בחיבור למסד הנתונים.", ex);
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>
@@ -513,7 +513,7 @@ namespace Server_codenames.DAL
             }
             catch (Exception ex)
             {
-                throw new Exception("Failed to read user.", ex);
+                throw new Exception("❌ שגיאה בקריאת נתוני המשתמש.", ex);
             }
             finally
             {
@@ -587,7 +587,7 @@ namespace Server_codenames.DAL
             }
             catch (Exception ex)
             {
-                throw new Exception("Database connection failed.", ex);
+                throw new Exception("נכשל להתחבר למסד הנתונים.", ex);
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>
@@ -617,7 +617,7 @@ namespace Server_codenames.DAL
             }
             catch (Exception ex)
             {
-                throw new Exception("Error reading pending friend requests.", ex);
+                throw new Exception("שגיאה בקריאת בקשות החברות שנשלחו.", ex);
             }
             finally
             {
@@ -625,6 +625,7 @@ namespace Server_codenames.DAL
                     con.Close();
             }
         }
+
 
         public List<server_codenames.BL.Users> GetPendingFriendRequestsReceived_DB(string receiverId)
         {

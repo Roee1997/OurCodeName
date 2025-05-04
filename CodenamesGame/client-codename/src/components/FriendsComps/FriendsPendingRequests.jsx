@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../../../firebaseConfig";
-import { subscribeToFriendSync, notifyFriendSync } from "../../services/firebaseService";
+import { subscribeToFriendSync, notifyFriendSync, subscribeToReceivedFriendRequests } from "../../services/firebaseService";
 import { remove, ref } from "firebase/database";
 import { db } from "../../../firebaseConfig";
-import { subscribeToReceivedFriendRequests } from "../../services/firebaseService";
+import { showToast } from "../../services/toastService";
 
 const FriendsPendingRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -15,22 +15,21 @@ const FriendsPendingRequests = () => {
 
   useEffect(() => {
     if (!userId) return;
-  
+
     const unsubscribeSync = subscribeToFriendSync(userId, () => {
       fetchPendingRequests();
       fetchReceivedRequests();
     });
-  
+
     const unsubscribeRealtimeReceived = subscribeToReceivedFriendRequests(userId, () => {
       fetchReceivedRequests();
     });
-  
+
     return () => {
       unsubscribeSync();
       unsubscribeRealtimeReceived();
     };
   }, [userId]);
-  
 
   const fetchPendingRequests = async () => {
     try {
@@ -41,6 +40,7 @@ const FriendsPendingRequests = () => {
     } catch (err) {
       console.error("שגיאה:", err);
       setError("שגיאה בטעינת בקשות שנשלחו.");
+      showToast("שגיאה בטעינת בקשות שנשלחו.", "error");
     }
   };
 
@@ -53,6 +53,7 @@ const FriendsPendingRequests = () => {
     } catch (err) {
       console.error("שגיאה:", err);
       setError("שגיאה בטעינת בקשות שהתקבלו.");
+      showToast("שגיאה בטעינת בקשות שהתקבלו.", "error");
     }
   };
 
@@ -60,24 +61,24 @@ const FriendsPendingRequests = () => {
     try {
       const res = await fetch("http://localhost:5150/api/friends/accept", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ senderID, receiverID })
       });
 
       const data = await res.json();
-      console.log("בקשה אושרה:", data);
-
       if (res.ok) {
+        showToast("הבקשה אושרה בהצלחה.", "success");
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
+      } else {
+        showToast(data.message || "הבקשה לא אושרה.", "error");
       }
 
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
       console.error("שגיאה באישור בקשה:", error);
+      showToast("שגיאה באישור בקשה.", "error");
     }
 
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
@@ -87,24 +88,25 @@ const FriendsPendingRequests = () => {
     try {
       const res = await fetch("http://localhost:5150/api/friends/cancel", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ senderID, receiverID, action })
       });
 
       const data = await res.json();
-      console.log("סטטוס עודכן:", data);
-
       if (res.ok) {
+        const msg = action === "cancel" ? "הבקשה בוטלה." : "הבקשה נדחתה.";
+        showToast(msg, "success");
         await notifyFriendSync(senderID);
         await notifyFriendSync(receiverID);
+      } else {
+        showToast(data.message || "שגיאה בעדכון הבקשה.", "error");
       }
 
       fetchPendingRequests();
       fetchReceivedRequests();
     } catch (error) {
       console.error("שגיאה בעדכון סטטוס:", error);
+      showToast("שגיאה בעדכון סטטוס.", "error");
     }
 
     await remove(ref(db, `friendRequestsStatus/${senderID}/${receiverID}`));
@@ -117,17 +119,13 @@ const FriendsPendingRequests = () => {
         <p className="text-gray-500">עליך להיות מחובר כדי לצפות בבקשות החברות.</p>
       ) : (
         <>
-          {/* 🔹 בקשות שנשלחו */}
           <h2 className="text-xl font-semibold mb-2">בקשות חברות שנשלחו</h2>
           {pendingRequests.length === 0 ? (
             <p className="text-gray-600 mb-4">לא שלחת עדיין בקשות חברות.</p>
           ) : (
             <ul className="space-y-2 mb-6">
               {pendingRequests.map((user) => (
-                <li
-                  key={user.userID}
-                  className="flex justify-between items-center bg-gray-100 p-3 rounded shadow"
-                >
+                <li key={user.userID} className="flex justify-between items-center bg-gray-100 p-3 rounded shadow">
                   <span>{user.username}</span>
                   <button
                     className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -140,17 +138,13 @@ const FriendsPendingRequests = () => {
             </ul>
           )}
 
-          {/* 🔹 בקשות שהתקבלו */}
           <h2 className="text-xl font-semibold mb-2">בקשות חברות שהתקבלו</h2>
           {receivedRequests.length === 0 ? (
             <p className="text-gray-600">אין לך בקשות חדשות.</p>
           ) : (
             <ul className="space-y-2">
               {receivedRequests.map((user) => (
-                <li
-                  key={user.userID}
-                  className="flex justify-between items-center bg-gray-100 p-3 rounded shadow"
-                >
+                <li key={user.userID} className="flex justify-between items-center bg-gray-100 p-3 rounded shadow">
                   <span>{user.username}</span>
                   <div className="space-x-2">
                     <button

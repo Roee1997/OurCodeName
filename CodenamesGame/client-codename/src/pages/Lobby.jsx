@@ -6,7 +6,8 @@ import MainHeadLine from "../components/MainHeadLine";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
-import {setUserOnlineStatus,} from "../services/firebaseService";
+import { setUserOnlineStatus } from "../services/firebaseService";
+import { toast } from "react-toastify";
 
 const Lobby = () => {
   const { user } = useAuth();
@@ -18,6 +19,13 @@ const Lobby = () => {
       setUserOnlineStatus(user.uid, false, null); // המשתמש מחובר, לא במשחק
     }
   }, [user]);
+
+  const showToast = (message, type = "info") => {
+    if (type === "success") toast.success(message);
+    else if (type === "error") toast.error(message);
+    else if (type === "warn") toast.warn(message);
+    else toast.info(message);
+  };
 
   if (!user) {
     return <p>יש להתחבר כדי לגשת לדף זה.</p>;
@@ -42,10 +50,10 @@ const Lobby = () => {
       if (!response.ok) throw new Error();
       const data = await response.json();
 
-      showToast("המשחק נוצר בהצלחה!", "success");
+      showToast("🎮 המשחק נוצר בהצלחה!", "success");
       navigate(`/game-lobby/${data.gameID}`);
     } catch {
-      showToast("שגיאה ביצירת המשחק. נסה שוב מאוחר יותר.", "error");
+      showToast("⚠️ שגיאה ביצירת המשחק. נסה שוב מאוחר יותר.", "error");
     }
   };
 

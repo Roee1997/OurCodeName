@@ -29,6 +29,7 @@ const GameLobby = () => {
     const unsubscribeStatus = onValue(statusRef, (snapshot) => {
       const status = snapshot.val();
       if (status === "started") {
+        toast.success("המשחק התחיל! מעביר ללוח המשחק");
         navigate(`/game/${gameId}`);
       }
     });
@@ -68,16 +69,14 @@ const GameLobby = () => {
           } catch (e) {
             errorMsg = "שגיאה לא צפויה בהצטרפות";
           }
-          console.error(errorMsg);
           toast.error(errorMsg);
           return;
         }
       }
 
-      await updatePlayer(team, isSpymaster);
+      await updatePlayer(team, isSpymaster, "join");
       toast.success(`הצטרפת לקבוצה ה${team === "Red" ? "אדומה" : "כחולה"}`);
     } catch (error) {
-      console.error("שגיאה ב־joinGameIfNeeded:", error);
       toast.error("שגיאה בהצטרפות למשחק");
     }
   };
@@ -109,7 +108,6 @@ const GameLobby = () => {
         toast.info(isSpymaster ? "עברת להיות לוחש 🕵️" : "עברת להיות סוכן רגיל");
       }
     } catch (error) {
-      console.error("שגיאה בעדכון שחקן:", error);
       toast.error("שגיאה בעדכון שחקן");
     }
   };
@@ -134,7 +132,6 @@ const GameLobby = () => {
       const data = await res.json();
       return data.isReady;
     } catch (err) {
-      console.error("שגיאה בבדיקת מוכנות המשחק", err);
       toast.error("שגיאה בבדיקת מוכנות המשחק");
       return false;
     }
@@ -157,9 +154,7 @@ const GameLobby = () => {
       const randomTeam = Math.random() < 0.5 ? "Red" : "Blue";
       await setTurn(gameId, randomTeam);
       await set(ref(db, `lobbies/${gameId}/status`), "started");
-      navigate(`/game/${gameId}`);
     } catch (err) {
-      console.error("שגיאה בהתחלת המשחק", err);
       toast.error("שגיאה בהתחלת המשחק");
     }
   };
@@ -210,7 +205,10 @@ const GameLobby = () => {
                               </span>
                               {player.isSpymaster && " 🕵️"}
                               <button
-                                onClick={() => joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false)}
+                                onClick={() => {
+                                  joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false);
+                                  updatePlayer(teamColor === "Red" ? "Blue" : "Red", false, "switch-team");
+                                }}
                                 className="ml-2 text-sm text-yellow-600 underline"
                               >
                                 החלף קבוצה
@@ -249,8 +247,8 @@ const GameLobby = () => {
           <div className="w-full lg:w-[22rem] xl:w-[26rem] bg-white/20 backdrop-blur p-4 rounded shadow text-white">
             <h2 className="text-xl font-bold mb-4">👥 חברים מחוברים</h2>
             {user?.uid && (
-  <OnlineFriendsList userId={user.uid} currentGameId={gameId} />
-)}
+              <OnlineFriendsList userId={user.uid} currentGameId={gameId} />
+            )}
           </div>
         </div>
       </main>

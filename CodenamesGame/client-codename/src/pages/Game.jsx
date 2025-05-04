@@ -12,6 +12,7 @@ import {
   subscribeToGameEnded,
   subscribeToTurn,
   subscribeToWinner,
+  setUserOnlineStatus,
 } from "../services/firebaseService";
 
 import Header from "../components/Header";
@@ -33,6 +34,7 @@ const Game = () => {
 
   useEffect(() => {
     if (!gameId || !user?.uid) return;
+    setUserOnlineStatus(user.uid, true, gameId); // המשתמש בתוך משחק
 
     const playerRef = ref(db, `lobbies/${gameId}/players/${user.uid}`);
     return onValue(playerRef, (snapshot) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import BackgroundImage from "../components/BackgroundImage";
@@ -6,12 +6,18 @@ import MainHeadLine from "../components/MainHeadLine";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
-import { showToast } from "../services/toastService";
+import {setUserOnlineStatus,} from "../services/firebaseService";
 
 const Lobby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [gameIdInput, setGameIdInput] = useState("");
+
+  useEffect(() => {
+    if (user?.uid) {
+      setUserOnlineStatus(user.uid, false, null); // המשתמש מחובר, לא במשחק
+    }
+  }, [user]);
 
   if (!user) {
     return <p>יש להתחבר כדי לגשת לדף זה.</p>;
@@ -79,20 +85,20 @@ const Lobby = () => {
           התחל משחק חדש
         </button>
 
-        <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-md text-center space-y-4">
-          <h2 className="text-xl font-bold text-gray-800">הצטרף למשחק קיים</h2>
+        <div className="bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl text-center space-y-6 w-full max-w-md border border-white/50">
+          <h2 className="text-2xl font-extrabold text-white drop-shadow">הצטרף למשחק קיים</h2>
 
           <input
             type="text"
             placeholder="הכנס קוד משחק"
             value={gameIdInput}
             onChange={(e) => setGameIdInput(e.target.value)}
-            className="border px-4 py-2 rounded w-64 text-center"
+            className="w-full px-5 py-3 text-center bg-white/70 text-gray-800 placeholder-gray-500 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
 
           <button
             onClick={handleJoinGame}
-            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            className="w-full py-3 bg-gradient-to-r from-indigo-400 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:from-indigo-500 hover:to-blue-600 transition-all"
           >
             הצטרף למשחק
           </button>

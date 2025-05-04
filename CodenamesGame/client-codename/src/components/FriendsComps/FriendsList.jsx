@@ -5,6 +5,7 @@ import {
   notifyFriendSync,
   subscribeToChatMeta
 } from "../../services/firebaseService";
+import { showToast } from "../../services/toastService"; // ✅ ייבוא מערכת התראות
 import ChatWindow from "../Chatwindow";
 
 const FriendsList = () => {
@@ -49,10 +50,10 @@ const FriendsList = () => {
       if (!res.ok) throw new Error("שגיאה בטעינת רשימת החברים.");
 
       const data = await res.json();
-      console.log("✅ חברים נטענו:", data);
+      console.log("חברים נטענו:", data);
       setFriends(data);
     } catch (err) {
-      console.error("❌ שגיאה בטעינת חברים:", err);
+      console.error("שגיאה בטעינת חברים:", err);
       setError("שגיאה בטעינת רשימת החברים.");
     }
   };
@@ -74,13 +75,17 @@ const FriendsList = () => {
       console.log("חבר הוסר:", data);
 
       if (res.ok) {
+        showToast("החבר הוסר בהצלחה", "success");
         await notifyFriendSync(userId);
         await notifyFriendSync(friendID);
+      } else {
+        showToast(data.message || "שגיאה בהסרת חבר", "error");
       }
 
       fetchFriends();
     } catch (error) {
-      console.error("❌ שגיאה בהסרת חבר:", error);
+      console.error("שגיאה בהסרת חבר:", error);
+      showToast("שגיאה בהסרת חבר", "error");
     }
   };
 

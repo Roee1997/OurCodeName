@@ -2,9 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* גלילה חלקה לכל הדף */
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
 body {
-    overflow: hidden;
-  }
-  .Header {
-    margin-bottom: 20px; /* מרווח בין הכותרת לטופס */
-  }
+  min-height: 100%;
+  overflow-y: auto !important;
+  background-color: #000; /* אם יש צורך ברקע כהה קבוע */
+}
+
+/* כותרת עליונה */
+.Header {
+  margin-bottom: 20px;
+}

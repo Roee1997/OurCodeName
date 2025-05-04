@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { ref, onValue } from "firebase/database";
 import { db } from "../../firebaseConfig";
 import { subscribeToFriendRequestAlerts, clearFriendRequestAlert } from "../services/firebaseService";
-import { showToast } from "../services/toastService"; // ✅
+import { showToast } from "../services/toastService";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -56,16 +56,16 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      showToast("התנתקת מהמערכת", "info"); // ✅
+      showToast("התנתקת מהמערכת", "info");
       navigate("/");
     } catch (error) {
       console.error("שגיאה בהתנתקות:", error);
-      showToast("שגיאה בעת התנתקות", "error"); // ✅
+      showToast("שגיאה בעת התנתקות", "error");
     }
   };
 
   return (
-    <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">
       <div className="text-2xl font-bold">
         <Link to="/">Codenames</Link>
       </div>
@@ -94,7 +94,7 @@ const Header = () => {
       ) : (
         <Link
           to="/login"
-          onClick={() => showToast("התחבר למערכת", "info")} // ✅
+          onClick={() => showToast("התחבר למערכת", "info")}
           className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition"
         >
           התחברות

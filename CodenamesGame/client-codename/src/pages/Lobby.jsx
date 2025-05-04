@@ -6,12 +6,12 @@ import MainHeadLine from "../components/MainHeadLine";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import codenamesImage from '../assets/codename.webp';
+import { showToast } from "../services/toastService";
 
 const Lobby = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [gameIdInput, setGameIdInput] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   if (!user) {
     return <p>יש להתחבר כדי לגשת לדף זה.</p>;
@@ -33,17 +33,19 @@ const Lobby = () => {
         body: JSON.stringify(gamePayload)
       });
 
-      if (!response.ok) throw new Error("שגיאה ביצירת המשחק");
+      if (!response.ok) throw new Error();
       const data = await response.json();
+
+      showToast("המשחק נוצר בהצלחה!", "success");
       navigate(`/game-lobby/${data.gameID}`);
-    } catch (error) {
-      setErrorMessage("אירעה שגיאה בעת יצירת המשחק. נסה שוב מאוחר יותר.");
+    } catch {
+      showToast("שגיאה ביצירת המשחק. נסה שוב מאוחר יותר.", "error");
     }
   };
 
   const handleJoinGame = async () => {
     if (!gameIdInput) {
-      setErrorMessage("יש להזין קוד משחק");
+      showToast("יש להזין קוד משחק", "error");
       return;
     }
 
@@ -52,13 +54,13 @@ const Lobby = () => {
       const data = await res.json();
 
       if (!data.joinable) {
-        setErrorMessage("המשחק לא קיים או שכבר התחיל.");
+        showToast("המשחק לא קיים או שכבר התחיל.", "error");
         return;
       }
 
       navigate(`/game-lobby/${gameIdInput}`);
-    } catch (error) {
-      setErrorMessage("שגיאה בבדיקת המשחק. נסה שוב.");
+    } catch {
+      showToast("שגיאה בבדיקת המשחק. נסה שוב.", "error");
     }
   };
 
@@ -69,12 +71,6 @@ const Lobby = () => {
 
       <div className="relative z-10 flex flex-col items-center justify-center flex-grow py-8 space-y-6">
         <MainHeadLine />
-
-        {errorMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md text-center" role="alert">
-            <strong className="font-bold">שגיאה:</strong> <span>{errorMessage}</span>
-          </div>
-        )}
 
         <button
           onClick={handleCreateGame}

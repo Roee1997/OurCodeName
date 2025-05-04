@@ -9,6 +9,7 @@ import {
   setTurn,
   subscribeToLobbyPlayers
 } from "../services/firebaseService";
+import { toast } from "react-toastify";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -67,16 +68,20 @@ const GameLobby = () => {
             errorMsg = "שגיאה לא צפויה בהצטרפות";
           }
           console.error(errorMsg);
+          toast.error(errorMsg);
           return;
         }
       }
+
       await updatePlayer(team, isSpymaster);
+      toast.success(`הצטרפת לקבוצה ה${team === "Red" ? "אדומה" : "כחולה"}`);
     } catch (error) {
       console.error("שגיאה ב־joinGameIfNeeded:", error);
+      toast.error("שגיאה בהצטרפות למשחק");
     }
   };
 
-  const updatePlayer = async (team, isSpymaster) => {
+  const updatePlayer = async (team, isSpymaster, context = "") => {
     try {
       await fetch(`http://localhost:5150/api/playeringames/${gameId}/update-player`, {
         method: "PUT",
@@ -96,8 +101,15 @@ const GameLobby = () => {
         team,
         isSpymaster
       });
+
+      if (context === "switch-team") {
+        toast.info("הקבוצה שלך עודכנה");
+      } else if (context === "spymaster-toggle") {
+        toast.info(isSpymaster ? "עברת להיות לוחש 🕵️" : "עברת להיות סוכן רגיל");
+      }
     } catch (error) {
       console.error("שגיאה בעדכון שחקן:", error);
+      toast.error("שגיאה בעדכון שחקן");
     }
   };
 
@@ -108,11 +120,11 @@ const GameLobby = () => {
     if (!alreadySpymaster) {
       const teamSpymaster = players.find(p => p.team === team && p.isSpymaster);
       if (teamSpymaster) {
-        alert("כבר יש לוחש בקבוצה הזו");
+        toast.error("כבר יש לוחש בקבוצה הזו");
         return;
       }
     }
-    updatePlayer(team, !alreadySpymaster);
+    updatePlayer(team, !alreadySpymaster, "spymaster-toggle");
   };
 
   const checkIfReady = async () => {
@@ -122,6 +134,7 @@ const GameLobby = () => {
       return data.isReady;
     } catch (err) {
       console.error("שגיאה בבדיקת מוכנות המשחק", err);
+      toast.error("שגיאה בבדיקת מוכנות המשחק");
       return false;
     }
   };
@@ -129,14 +142,14 @@ const GameLobby = () => {
   const startGame = async () => {
     const ready = await checkIfReady();
     if (!ready) {
-      alert("המשחק עדיין לא מוכן – חייב לוחש וסוכן בכל קבוצה");
+      toast.warn("המשחק עדיין לא מוכן – חייב לוחש וסוכן בכל קבוצה");
       return;
     }
     try {
       const res = await fetch(`http://localhost:5150/api/games/${gameId}/start`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
-        alert(data?.message || "שגיאה בהתחלת המשחק");
+        toast.error(data?.message || "שגיאה בהתחלת המשחק");
         return;
       }
       await saveBoardToFirebase(gameId, data.board);
@@ -146,7 +159,7 @@ const GameLobby = () => {
       navigate(`/game/${gameId}`);
     } catch (err) {
       console.error("שגיאה בהתחלת המשחק", err);
-      alert("שגיאה בהתחלת המשחק");
+      toast.error("שגיאה בהתחלת המשחק");
     }
   };
 
@@ -194,7 +207,10 @@ const GameLobby = () => {
                           </span>
                           {player.isSpymaster && " 🕵️"}
                           <button
-                            onClick={() => joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false)}
+                            onClick={() => {
+                              joinGameIfNeeded(teamColor === "Red" ? "Blue" : "Red", false);
+                              toast.info("החלפת קבוצה");
+                            }}
                             className="ml-2 text-sm text-yellow-600 underline"
                           >
                             החלף קבוצה

@@ -2,43 +2,40 @@ import React, { useState } from 'react';
 import { loginUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { showToast } from '../services/toastService';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setLoading(true);
 
     try {
       const user = await loginUser(email, password);
       console.log('✅ התחברות מוצלחת:', user);
-      setSuccess('✅ התחברת בהצלחה! מעביר אותך ללובי...');
+      showToast('התחברת בהצלחה! מעביר אותך ללובי...', 'success');
       setTimeout(() => navigate('/Lobby'), 1500);
     } catch (error) {
       console.error("❌ שגיאה בהתחברות:", error.code);
       switch (error.code) {
         case "auth/wrong-password":
-          setError("סיסמה שגויה. נסה שוב.");
+          showToast("סיסמה שגויה. נסה שוב.", "error");
           break;
         case "auth/user-not-found":
-          setError("המשתמש לא קיים.");
+          showToast("המשתמש לא קיים.", "error");
           break;
         case "auth/invalid-credential":
-          setError("אימייל או סיסמה שגויים.");
+          showToast("אימייל או סיסמה שגויים.", "error");
           break;
         case "auth/too-many-requests":
-          setError("נראה שעשית יותר מדי ניסיונות. נסה שוב מאוחר יותר.");
+          showToast("נראה שעשית יותר מדי ניסיונות. נסה שוב מאוחר יותר.", "error");
           break;
         default:
-          setError("שגיאה בהתחברות. נסה שוב מאוחר יותר.");
+          showToast("שגיאה בהתחברות. נסה שוב מאוחר יותר.", "error");
       }
     }
 
@@ -49,9 +46,6 @@ const LoginForm = () => {
     <div>
       <div className="relative z-10 bg-gradient-to-r from-gray-800 via-gray-900 to-black p-8 rounded-xl shadow-2xl w-96 mx-auto mt-12">
         <h2 className="text-3xl font-bold text-center mb-6 text-white drop-shadow-md">התחברות</h2>
-
-        {error && <p className="bg-red-100 text-red-700 border border-red-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{error}</p>}
-        {success && <p className="bg-green-100 text-green-700 border border-green-400 px-4 py-2 rounded mb-4 text-center" dir="rtl">{success}</p>}
 
         <form onSubmit={handleLogin}>
           <div className="mb-4">

@@ -8,12 +8,13 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
 
   useEffect(() => {
     if (!gameId) return;
-    const unsubscribe = subscribeToLastClue(gameId, setLastClueState);
-    return () => unsubscribe();
+    const unsub = subscribeToLastClue(gameId, setLastClueState);
+    return () => unsub();
   }, [gameId]);
 
   const handleSend = async () => {
     if (!word || !number) return;
+
     const clue = {
       word: word.trim(),
       number: parseInt(number),
@@ -23,32 +24,22 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
 
     await sendClueToFirebase(gameId, clue);
     await setLastClue(gameId, clue);
+    console.log("📤 רמז נשלח ל־Firebase:", clue);
 
     setWord("");
     setNumber("");
   };
 
   if (team !== currentTurn) {
-    return (
-      <div className="text-center mt-2 text-gray-600 font-medium">
-        ⏳ ממתין לתור הקבוצה שלך...
-      </div>
-    );
+    return <div className="text-center mt-2 text-gray-600 font-medium">⏳ ממתין לתור הקבוצה שלך...</div>;
   }
 
   if (lastClue && lastClue.team === team) {
-    return (
-      <div className="text-center mt-2 text-gray-600 font-medium">
-        🕵️ שלחת רמז – ממתין לסיום התור...
-      </div>
-    );
+    return <div className="text-center mt-2 text-gray-600 font-medium">🕵️ שלחת רמז – ממתין לסיום התור...</div>;
   }
 
   return (
-    <div
-      className="p-4 bg-gray-100 rounded shadow-md text-center"
-      style={{ maxWidth: "450px", margin: "0 auto" }} // ⬅️ צר יותר
-    >
+    <div className="p-4 bg-gray-100 rounded shadow-md text-center" style={{ maxWidth: "450px", margin: "0 auto" }}>
       <h3 className="text-gray-600 font-bold mb-2">
         🕵️ תן רמז לקבוצה {team === "Red" ? "האדומה 🔴" : "הכחולה 🔵"}
       </h3>
@@ -67,9 +58,7 @@ const CluePanel = ({ team, gameId, currentTurn }) => {
         >
           <option value="">בחר</option>
           {[...Array(8)].map((_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {i + 1}
-            </option>
+            <option key={i + 1} value={i + 1}>{i + 1}</option>
           ))}
         </select>
         <button
